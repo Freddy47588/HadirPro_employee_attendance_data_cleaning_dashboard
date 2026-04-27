@@ -23,14 +23,3 @@ CSV maupun Excel (XLS/XLSX).
 -   Chart.js
 
 ------------------------------------------------------------------------
-
-## ⚙️ Cara Menjalankan
-
-1.  Clone repo
-2.  Buka index.html di browser
-
-------------------------------------------------------------------------
-
-## 📄 Lisensi
-
-MIT License
