@@ -18,36 +18,6 @@ let state = {
   sourceFile: null
 };
 
-// ══════════════════════════════════
-// SAMPLE DATA
-// ══════════════════════════════════
-const SAMPLE_CSV = `ID,Nama,Departemen,Tanggal,Jam Masuk,Jam Keluar
-EMP001,Budi Santoso,IT,2024-01-15,07:58,17:02
-EMP002,Sari Dewi,Keuangan,2024-01-15,08:30,19:45
-EMP003,Ahmad Fauzi,HRD,2024-01-15,,17:15
-EMP001,Budi Santoso,IT,2024-01-15,07:58,17:02
-EMP004,Linda Wati,Marketing,2024-01-15,09:15,16:45
-EMP005,Reza Pratama,IT,2024-01-15,8.00,20:30
-EMP002,Sari Dewi,Keuangan,2024-01-16,07:50,
-EMP003,Ahmad Fauzi,HRD,2024-01-16,08:05,17:10
-EMP001,Budi Santoso,IT,2024-01-16,08:22,18:30
-EMP004,Linda Wati,Marketing,2024-01-16,08:00,17:00
-EMP006,Dian Permata,Operasional,2024-01-16,10:30,17:00
-EMP005,Reza Pratama,IT,2024-01-16,08:15,21:00
-EMP007,Hendra Wijaya,Keuangan,2024-01-17,07:45,17:05
-EMP002,Sari Dewi,Keuangan,2024-01-17,08:40,20:00
-EMP003,Ahmad Fauzi,HRD,2024-01-17,,
-EMP001,Budi Santoso,IT,2024-01-17,08:10,18:00
-EMP004,Linda Wati,Marketing,2024-01-17,08:00,17:00
-EMP006,Dian Permata,Operasional,2024-01-17,08:05,17:10
-EMP008,Putri Ayu,HRD,2024-01-18,08:00,17:00
-EMP008,Putri Ayu,HRD,2024-01-18,08:00,17:00
-EMP009,Fajar Nugroho,Marketing,2024-01-18,09:45,17:30
-EMP001,Budi Santoso,IT,2024-01-18,07:55,19:00
-EMP005,Reza Pratama,IT,2024-01-18,8:30,22:00
-EMP007,Hendra Wijaya,Keuangan,2024-01-18,08:00,17:00
-EMP010,Maya Kusuma,Operasional,2024-01-18,07:48,17:15
-EMP002,Sari Dewi,Keuangan,2024-01-18,08:20,21:30`;
 
 // ══════════════════════════════════
 // XLS PARSER — format feb.xls
