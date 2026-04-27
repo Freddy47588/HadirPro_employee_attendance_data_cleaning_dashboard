@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HADIR Pro — Sistem Pembersihan Data Absensi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  </head>
+  <body>
+    <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="7" fill="#10B981" />
+            <path
+              d="M7 14h14M14 7v14M10 10l8 8M18 10l-8 8"
+              stroke="#fff"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div>
+            <div class="brand-name">HADIR<span>Pro</span></div>
+            <div class="brand-sub">v2.0 — Data Cleaner</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-label">Menu Utama</div>
+        <a
+          class="nav-item active"
+          data-section="overview"
+          onclick="switchSection('overview')"
+        >
+          <svg viewBox="0 0 20 20">
+            <rect x="2" y="2" width="7" height="7" rx="1.5" />
+            <rect x="11" y="2" width="7" height="7" rx="1.5" />
+            <rect x="2" y="11" width="7" height="7" rx="1.5" />
+            <rect x="11" y="11" width="7" height="7" rx="1.5" />
+          </svg>
+          Ringkasan
+        </a>
+        <a class="nav-item" data-section="raw" onclick="switchSection('raw')">
+          <svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h8" /></svg>
+          Data Mentah
+          <span class="nav-badge" id="rawCount">—</span>
+        </a>
+        <a
+          class="nav-item"
+          data-section="issues"
+          onclick="switchSection('issues')"
+        >
+          <svg viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="8" />
+            <path d="M10 6v5M10 14v.5" />
+          </svg>
+          Masalah Data
+          <span class="nav-badge danger" id="issueCount">0</span>
+        </a>
+        <a
+          class="nav-item"
+          data-section="clean"
+          onclick="switchSection('clean')"
+        >
+          <svg viewBox="0 0 20 20"><path d="M4 12l4 4 8-8" /></svg>
+          Data Bersih
+          <span class="nav-badge success" id="cleanCount">—</span>
+        </a>
+        <a
+          class="nav-item"
+          data-section="charts"
+          onclick="switchSection('charts')"
+        >
+          <svg viewBox="0 0 20 20">
+            <path d="M3 16l4-6 4 3 4-8" />
+            <circle cx="15" cy="5" r="1.5" />
+          </svg>
+          Grafik & Analitik
+        </a>
+      </nav>
+
+      <div class="sidebar-upload">
+        <div class="nav-label">Import Data</div>
+        <div class="upload-zone" id="uploadZone">
+          <svg viewBox="0 0 24 24" width="28" height="28">
+            <path
+              d="M12 2L8 6h3v8h2V6h3L12 2zm-7 13H4v4a1 1 0 001 1h14a1 1 0 001-1v-4h-1"
+            />
+          </svg>
+          <span
+            >Tarik & Lepas CSV / XLS<br /><small
+              >atau klik untuk pilih file</small
+            ></span
+          >
+          <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" />
+        </div>
+      </div>
+
+      <div class="sidebar-config">
+        <div class="nav-label">Konfigurasi</div>
+        <div class="config-row">
+          <label>Jam Masuk Standar</label>
+          <input type="text" id="cfgStdIn" value="08:00" class="cfg-input" />
+        </div>
+        <div class="config-row">
+          <label>Jam Pulang Standar</label>
+          <input type="text" id="cfgStdOut" value="17:00" class="cfg-input" />
+        </div>
+        <div class="config-row">
+          <label>Batas Lembur (jam)</label>
+          <input type="text" id="cfgOT" value="17:00" class="cfg-input" />
+        </div>
+        <div class="config-row">
+          <label>Toleransi Terlambat</label>
+          <input type="text" id="cfgTol" value="15" class="cfg-input" /><small
+            style="color: var(--muted)"
+          >
+            menit</small
+          >
+        </div>
+        <div class="toggle-row">
+          <label class="toggle"
+            ><input type="checkbox" id="chkDup" checked /><span></span>Hapus
+            duplikat</label
+          >
+          <label class="toggle"
+            ><input type="checkbox" id="chkFmt" checked /><span></span
+            >Normalisasi format jam</label
+          >
+          <label class="toggle"
+            ><input type="checkbox" id="chkDur" checked /><span></span>Hitung
+            durasi kerja</label
+          >
+          <label class="toggle"
+            ><input type="checkbox" id="chkLate" checked /><span></span>Deteksi
+            keterlambatan</label
+          >
+          <label class="toggle"
+            ><input type="checkbox" id="chkOT" checked /><span></span>Hitung jam
+            lembur</label
+          >
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="page-title" id="pageTitle">Ringkasan</div>
+          <div class="page-sub" id="pageSub">Tidak ada data dimuat</div>
+        </div>
+        <div class="topbar-right">
+          <div class="quality-pill" id="qualityPill">
+            <span class="qp-label">Kualitas Data</span>
+            <span class="qp-score" id="qpScore">—</span>
+          </div>
+          <button class="btn-clean" id="btnClean" onclick="runClean()" disabled>
+            <svg viewBox="0 0 20 20" width="16" height="16">
+              <path d="M4 12l4 4 8-8" />
+            </svg>
+            Bersihkan
+          </button>
+          <button
+            class="btn-download"
+            id="btnDownload"
+            onclick="downloadCSV()"
+            disabled
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16">
+              <path d="M10 3v10M6 9l4 4 4-4M4 17h12" />
+            </svg>
+            Unduh CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- ── SECTION: OVERVIEW ── -->
+      <section class="section active" id="sec-overview">
+        <div class="overview-empty" id="overviewEmpty">
+          <div class="empty-illustration">
+            <svg viewBox="0 0 120 100" width="120" height="100">
+              <rect
+                x="10"
+                y="20"
+                width="100"
+                height="65"
+                rx="6"
+                fill="#1e2a3a"
+                stroke="#2d3f55"
+                stroke-width="1.5"
+              />
+              <rect x="20" y="35" width="40" height="6" rx="3" fill="#2d3f55" />
+              <rect x="20" y="47" width="60" height="6" rx="3" fill="#2d3f55" />
+              <rect x="20" y="59" width="50" height="6" rx="3" fill="#2d3f55" />
+              <circle cx="90" cy="30" r="15" fill="#10B981" opacity=".15" />
+              <path
+                d="M83 30l5 5 9-9"
+                stroke="#10B981"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <h2>Mulai dengan memuat data</h2>
+          <button
+            class="upload-btn"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            Upload CSV / XLS
+          </button>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".csv,.xls,.xlsx"
+            style="display: none"
+          />
+        </div>
+        <div id="overviewDash" style="display: none">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon blue">
+                <svg viewBox="0 0 20 20">
+                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0" />
+                </svg>
+              </div>
+              <div class="kpi-val" id="kpiTotal">—</div>
+              <div class="kpi-lbl">Total Baris Data</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon red">
+                <svg viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="8" />
+                  <path d="M10 6v5M10 14v.5" />
+                </svg>
+              </div>
+              <div class="kpi-val" id="kpiIssues">—</div>
+              <div class="kpi-lbl">Masalah Ditemukan</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon yellow">
+                <svg viewBox="0 0 20 20">
+                  <path
+                    d="M10 2l2.5 5H18l-4.5 3.5 2 5.5L10 13l-5.5 3 2-5.5L2 7h5.5L10 2z"
+                  />
+                </svg>
+              </div>
+              <div class="kpi-val" id="kpiLate">—</div>
+              <div class="kpi-lbl">Rata² Terlambat</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon green">
+                <svg viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="8" />
+                  <path d="M7 10l2 2 4-4" />
+                </svg>
+              </div>
+              <div class="kpi-val" id="kpiOT">—</div>
+              <div class="kpi-lbl">Total Jam Lembur</div>
+            </div>
+          </div>
+
+          <div class="qual-section">
+            <div class="qual-header">
+              <span>Skor Kualitas Data</span>
+              <span class="qual-score-big" id="qualScoreBig">—</span>
+            </div>
+            <div class="qual-bar-wrap">
+              <div class="qual-bar-fill" id="qualBarFill"></div>
+            </div>
+            <div class="qual-breakdown">
+              <div class="qb-item">
+                <span class="qb-dot dup"></span>
+                <span class="qb-lbl">Duplikat</span>
+                <span class="qb-val" id="qbDup">—</span>
+              </div>
+              <div class="qb-item">
+                <span class="qb-dot miss"></span>
+                <span class="qb-lbl">Data Kosong</span>
+                <span class="qb-val" id="qbMiss">—</span>
+              </div>
+              <div class="qb-item">
+                <span class="qb-dot fmt"></span>
+                <span class="qb-lbl">Format Salah</span>
+                <span class="qb-val" id="qbFmt">—</span>
+              </div>
+              <div class="qb-item">
+                <span class="qb-dot ok"></span>
+                <span class="qb-lbl">Baris Valid</span>
+                <span class="qb-val ok-val" id="qbOK">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-charts-grid">
+            <div class="chart-card">
+              <div class="chart-card-title">Distribusi Masalah Data</div>
+              <div class="chart-wrap" style="height: 180px">
+                <canvas id="chartIssueDonut"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title">Jam Masuk — Pola Harian</div>
+              <div class="chart-wrap" style="height: 180px">
+                <canvas id="chartArrival"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: RAW ── -->
+      <section class="section" id="sec-raw">
+        <div class="table-toolbar">
+          <input
+            type="text"
+            id="rawSearch"
+            class="search-input"
+            placeholder="Cari nama / ID karyawan…"
+            oninput="filterTable('raw')"
+          />
+          <span class="table-info" id="rawTableInfo"></span>
+        </div>
+        <div class="table-wrap" id="rawTableWrap">
+          <div class="empty-table">Belum ada data dimuat.</div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: ISSUES ── -->
+      <section class="section" id="sec-issues">
+        <div id="issueList">
+          <div class="empty-table">Belum ada data dimuat.</div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: CLEAN ── -->
+      <section class="section" id="sec-clean">
+        <div class="table-toolbar">
+          <input
+            type="text"
+            id="cleanSearch"
+            class="search-input"
+            placeholder="Cari nama / ID karyawan…"
+            oninput="filterTable('clean')"
+          />
+          <span class="table-info" id="cleanTableInfo"></span>
+        </div>
+        <div class="table-wrap" id="cleanTableWrap">
+          <div class="empty-table">Klik "Bersihkan" untuk memproses data.</div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: CHARTS ── -->
+      <section class="section" id="sec-charts">
+        <div id="chartsEmpty" class="empty-table" style="padding: 60px 20px">
+          Muat data terlebih dahulu untuk melihat grafik.
+        </div>
+        <div id="chartsDash" style="display: none">
+          <div class="charts-grid-full">
+            <div class="chart-card wide">
+              <div class="chart-card-title">Tren Kehadiran Harian</div>
+              <div class="chart-wrap" style="height: 240px">
+                <canvas id="chartTrend"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title">Jam Lembur per Karyawan</div>
+              <div class="chart-wrap" style="height: 240px">
+                <canvas id="chartOT"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title">Frekuensi Keterlambatan</div>
+              <div class="chart-wrap" style="height: 240px">
+                <canvas id="chartLate"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title">Distribusi Durasi Kerja</div>
+              <div class="chart-wrap" style="height: 240px">
+                <canvas id="chartDurDist"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title">Kualitas Data per Kolom</div>
+              <div class="chart-wrap" style="height: 240px">
+                <canvas id="chartColQuality"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
