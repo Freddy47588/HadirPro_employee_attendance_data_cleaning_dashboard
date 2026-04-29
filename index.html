@@ -1,407 +1,2170 @@
-<!doctype html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HADIR Pro — Sistem Pembersihan Data Absensi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  </head>
-  <body>
-    <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-logo">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect width="28" height="28" rx="7" fill="#10B981" />
-            <path
-              d="M7 14h14M14 7v14M10 10l8 8M18 10l-8 8"
-              stroke="#fff"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-          <div>
-            <div class="brand-name">HADIR<span>Pro</span></div>
-            <div class="brand-sub">v2.0 — Data Cleaner</div>
-          </div>
-        </div>
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard Presensi Karyawan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --panel: #1c2333; --panel2: #21262d;
+  --border: #30363d; --border2: #484f58;
+  --text: #e6edf3; --text2: #8b949e; --text3: #6e7681;
+  --blue: #58a6ff; --blue-d: #1f6feb; --blue-bg: rgba(31,111,235,.15);
+  --green: #3fb950; --green-bg: rgba(63,185,80,.13);
+  --red: #f85149; --red-bg: rgba(248,81,73,.13);
+  --yellow: #e3b341; --yellow-bg: rgba(227,179,65,.13);
+  --purple: #bc8cff; --purple-bg: rgba(188,140,255,.13);
+  --teal: #39d353; --orange: #f0883e;
+  --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32;
+  --r: 10px; --r2: 6px; --shadow: 0 4px 20px rgba(0,0,0,.4);
+  --sidebar-w: 260px; --topbar-h: 60px;
+}
+[data-theme="light"] {
+  --bg: #f0f2f5; --bg2: #ffffff; --panel: #ffffff; --panel2: #f6f8fa;
+  --border: #d0d7de; --border2: #afb8c1;
+  --text: #1f2328; --text2: #57606a; --text3: #6e7781;
+  --blue: #0969da; --blue-d: #0550ae; --blue-bg: rgba(9,105,218,.08);
+  --green: #1a7f37; --green-bg: rgba(26,127,55,.08);
+  --red: #cf222e; --red-bg: rgba(207,34,46,.08);
+  --yellow: #9a6700; --yellow-bg: rgba(154,103,0,.08);
+  --purple: #8250df; --purple-bg: rgba(130,80,223,.08);
+  --teal: #116329; --orange: #bc4c00;
+  --shadow: 0 2px 12px rgba(0,0,0,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .3s}
+.sidebar-inner{flex:1;overflow-y:auto;padding:16px 0}
+.brand{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue-d),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-icon svg{fill:none;stroke:#fff;stroke-width:2}
+.brand-text{flex:1;min-width:0}
+.brand-name{font-weight:700;font-size:13px;color:var(--text)}
+.brand-sub{font-size:11px;color:var(--text3)}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.theme-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+.nav-section{padding:12px 12px 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:2px 8px;border-radius:var(--r2);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .15s;text-decoration:none;border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7;fill:none;stroke:currentColor;stroke-width:1.8}
+.nav-item:hover{background:var(--panel);color:var(--text)}
+.nav-item.active{background:var(--blue-bg);color:var(--blue)}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--panel2);color:var(--text3);font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.nav-badge.danger{background:var(--red-bg);color:var(--red)}
+.nav-badge.success{background:var(--green-bg);color:var(--green)}
+
+.upload-zone{margin:12px;border:2px dashed var(--border);border-radius:var(--r);padding:20px 14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:var(--blue-bg)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone svg{fill:none;stroke:var(--text3);stroke-width:1.5;margin-bottom:6px}
+.upload-zone p{font-size:12px;color:var(--text3);line-height:1.4}
+.upload-zone p strong{color:var(--blue)}
+
+.sidebar-divider{height:1px;background:var(--border);margin:8px 14px}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:var(--topbar-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--text);flex:1}
+.topbar-sub{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+.filter-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-wrap label{font-size:12px;color:var(--text3)}
+select.filter-sel,input.filter-inp{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:var(--r2);font-size:12px;font-family:'Sora',sans-serif;cursor:pointer;outline:none}
+select.filter-sel:focus,input.filter-inp:focus{border-color:var(--blue)}
+input.filter-inp{width:130px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r2);border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:'Sora',sans-serif;transition:all .15s}
+.btn-primary{background:var(--blue-d);color:#fff}
+.btn-primary:hover{background:var(--blue)}
+.btn-ghost{background:var(--panel);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* ── SECTIONS ── */
+.section{display:none;animation:fadeIn .2s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center;gap:12px}
+.empty-state svg{opacity:.3}
+.empty-state h3{color:var(--text);font-size:16px}
+.empty-state p{color:var(--text3);font-size:13px;max-width:340px}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;position:relative;overflow:hidden;transition:border-color .2s}
+.kpi-card:hover{border-color:var(--border2)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.kpi-card.blue::before{background:var(--blue)}
+.kpi-card.green::before{background:var(--green)}
+.kpi-card.red::before{background:var(--red)}
+.kpi-card.yellow::before{background:var(--yellow)}
+.kpi-card.purple::before{background:var(--purple)}
+.kpi-card.orange::before{background:var(--orange)}
+.kpi-icon{font-size:16px;margin-bottom:6px}
+.kpi-val{font-size:18px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px;font-family:'JetBrains Mono',monospace}
+.kpi-lbl{font-size:10px;color:var(--text3);font-weight:500}
+
+/* ── GAUGE ── */
+.gauge-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative}
+.gauge-canvas{transform:rotate(-90deg)}
+.gauge-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-pct{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.gauge-sub{font-size:10px;color:var(--text3)}
+
+/* ── CHART GRID ── */
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}
+.charts-grid.three{grid-template-columns:repeat(3,1fr)}
+.charts-grid.wide .chart-card:first-child{grid-column:1/-1}
+.chart-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;overflow:hidden}
+.chart-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+.chart-wrap{position:relative}
+
+/* ── TABLE ── */
+.table-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.search-inp{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:var(--r2);font-size:12px;font-family:'Sora',sans-serif;outline:none;width:220px}
+.search-inp:focus{border-color:var(--blue)}
+.table-info{font-size:11px;color:var(--text3);margin-left:auto;font-family:'JetBrains Mono',monospace}
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead tr{background:var(--panel2)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--panel2)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge.hadir{background:var(--green-bg);color:var(--green)}
+.badge.absen{background:var(--red-bg);color:var(--red)}
+.badge.cuti{background:var(--yellow-bg);color:var(--yellow)}
+.badge.terlambat{background:rgba(240,136,62,.15);color:var(--orange)}
+.badge.ontime{background:var(--blue-bg);color:var(--blue)}
+
+/* ── LEADERBOARD ── */
+.leaderboard{display:flex;flex-direction:column;gap:8px}
+.lb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);transition:all .2s;cursor:default}
+.lb-item:hover{border-color:var(--border2);transform:translateX(3px)}
+.lb-item.rank1{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.04)}
+.lb-item.rank2{border-color:rgba(192,192,192,.3)}
+.lb-item.rank3{border-color:rgba(205,127,50,.3)}
+.lb-rank{font-size:18px;font-weight:700;width:30px;text-align:center;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.lb-rank.r1{color:var(--gold)}
+.lb-rank.r2{color:var(--silver)}
+.lb-rank.r3{color:var(--bronze)}
+.lb-rank.rn{color:var(--text3)}
+.lb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue-d),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-weight:600;font-size:13px;color:var(--text)}
+.lb-dept{font-size:11px;color:var(--text3)}
+.lb-score{text-align:right}
+.lb-score-val{font-size:16px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace}
+.lb-score-lbl{font-size:10px;color:var(--text3)}
+.lb-bar-wrap{flex:1;max-width:160px;background:var(--panel2);border-radius:4px;height:6px;overflow:hidden}
+.lb-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue-d),var(--blue));transition:width .6s ease}
+
+/* ── PERSONAL PROFILE ── */
+.profile-header{display:grid;grid-template-columns:auto 1fr auto;gap:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;align-items:start}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue-d),var(--purple));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0}
+.profile-identity h2{font-size:18px;font-weight:700;color:var(--text)}
+.profile-identity p{font-size:12px;color:var(--text3);margin-top:2px}
+.profile-kpis{display:flex;gap:16px;flex-wrap:wrap}
+.profile-kpi{text-align:center;min-width:70px}
+.profile-kpi-val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.profile-kpi-lbl{font-size:10px;color:var(--text3);margin-top:2px;white-space:nowrap}
+
+/* ── EVAL CARD ── */
+.eval-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:16px}
+.eval-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.eval-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.eval-item:last-child{border-bottom:none}
+.eval-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.eval-text{font-size:12.5px;color:var(--text2);line-height:1.5}
+.eval-text strong{color:var(--text)}
+
+/* ── HISTORY ── */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.history-icon{width:36px;height:36px;background:var(--green-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:18px;flex-shrink:0}
+.history-info{flex:1;min-width:0}
+.history-name{font-weight:600;font-size:13px;color:var(--text)}
+.history-meta{font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.history-del{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:4px;transition:.15s}
+.history-del:hover{color:var(--red)}
+
+/* ── MONTH FILTER ── */
+.month-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.month-tab{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;transition:.15s;font-family:'Sora',sans-serif}
+.month-tab:hover{border-color:var(--border2);color:var(--text)}
+.month-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+
+/* ── OVERVIEW STATS COMBO ── */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.stat-box{background:var(--panel2);border-radius:var(--r2);padding:10px 14px}
+.stat-box-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.stat-box-val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* ── ATTENDANCE DONUT CARDS ── */
+.donut-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.donut-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:12px}
+.donut-card canvas{flex-shrink:0}
+.donut-info{flex:1}
+.donut-pct{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.donut-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.donut-detail{margin-top:8px}
+.donut-detail-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);padding:2px 0}
+.donut-detail-row span:last-child{font-family:'JetBrains Mono',monospace;color:var(--text)}
+
+/* ── SCROLLABLE LEADERBOARD ── */
+.lb-scroll{max-height:500px;overflow-y:auto;padding-right:4px}
+
+/* ── RESIGNED BADGE ── */
+.badge.resign{background:rgba(110,118,129,.15);color:var(--text3)}
+.emp-resigned{opacity:.55;pointer-events:none}
+
+/* ── ADMIN MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px)}
+.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:28px 32px;min-width:320px;box-shadow:var(--shadow)}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px}
+.modal-input{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--r2);font-size:14px;font-family:'JetBrains Mono',monospace;letter-spacing:.15em;outline:none;margin-bottom:14px}
+.modal-input:focus{border-color:var(--blue)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.modal-err{color:var(--red);font-size:12px;margin-bottom:10px;display:none}
+
+/* ── AVATAR UPLOAD ── */
+.avatar-wrap{position:relative;cursor:pointer;display:inline-block}
+.avatar-wrap:hover .avatar-edit-overlay{opacity:1}
+.avatar-edit-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;font-size:18px}
+.avatar-img{width:64px;height:64px;border-radius:50%;object-fit:cover}
+
+/* ── HOLIDAY BADGE ── */
+.badge.libur{background:var(--blue-bg);color:var(--blue)}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:var(--panel2);border-radius:4px;height:8px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease}
+
+/* ── TOOLTIP ── */
+[title]{cursor:help}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .charts-grid,.charts-grid.three{grid-template-columns:1fr}
+  .profile-header{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+  .profile-kpis{grid-column:1/-1}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon" style="background:none;padding:0;overflow:hidden">
+        <img src="data:image/png;base64,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" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:block"/>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name" style="font-size:12px;letter-spacing:.04em;text-transform:uppercase">ATTENDANCE</div>
+        <div class="brand-sub">PT Digtive Global Media</div>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle tema">
+        <svg id="themeIcon" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="10" cy="10" r="4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-inner">
+      <div class="nav-section">Menu</div>
+      <button class="nav-item active" data-sec="overview" onclick="switchSection('overview')">
+        <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+        Ringkasan Umum
+      </button>
+      <button class="nav-item" data-sec="leaderboard" onclick="switchSection('leaderboard')">
+        <svg viewBox="0 0 20 20"><path d="M8 15H4V9h4v6zM12 15H8V5h4v10zM16 15h-4V7h4v8z"/></svg>
+        Leaderboard
+        <span class="nav-badge" id="nbEmp">—</span>
+      </button>
+      <button class="nav-item" data-sec="personal" onclick="switchSection('personal')">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="3"/><path d="M3 18a7 7 0 0114 0"/></svg>
+        Profil Karyawan
+      </button>
+      <button class="nav-item" data-sec="table" onclick="switchSection('table')">
+        <svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14"/><line x1="7" y1="3" x2="7" y2="17"/></svg>
+        Data Presensi
+        <span class="nav-badge" id="nbRows">—</span>
+      </button>
+
+      <div class="sidebar-divider"></div>
+      <div class="nav-section">Upload</div>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(this.files[0])"/>
+        <svg width="28" height="28" viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2L8 6h3v8h2V6h3L12 2zm-7 13H4v4a1 1 0 001 1h14a1 1 0 001-1v-4h-1"/></svg>
+        <p><strong>Klik atau drop file</strong><br/>XLSX / XLS / CSV</p>
       </div>
 
-      <nav class="nav">
-        <div class="nav-label">Menu Utama</div>
-        <a
-          class="nav-item active"
-          data-section="overview"
-          onclick="switchSection('overview')"
-        >
-          <svg viewBox="0 0 20 20">
-            <rect x="2" y="2" width="7" height="7" rx="1.5" />
-            <rect x="11" y="2" width="7" height="7" rx="1.5" />
-            <rect x="2" y="11" width="7" height="7" rx="1.5" />
-            <rect x="11" y="11" width="7" height="7" rx="1.5" />
-          </svg>
-          Ringkasan
-        </a>
-        <a class="nav-item" data-section="raw" onclick="switchSection('raw')">
-          <svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h8" /></svg>
-          Data Mentah
-          <span class="nav-badge" id="rawCount">—</span>
-        </a>
-        <a
-          class="nav-item"
-          data-section="issues"
-          onclick="switchSection('issues')"
-        >
-          <svg viewBox="0 0 20 20">
-            <circle cx="10" cy="10" r="8" />
-            <path d="M10 6v5M10 14v.5" />
-          </svg>
-          Masalah Data
-          <span class="nav-badge danger" id="issueCount">0</span>
-        </a>
-        <a
-          class="nav-item"
-          data-section="clean"
-          onclick="switchSection('clean')"
-        >
-          <svg viewBox="0 0 20 20"><path d="M4 12l4 4 8-8" /></svg>
-          Data Bersih
-          <span class="nav-badge success" id="cleanCount">—</span>
-        </a>
-        <a
-          class="nav-item"
-          data-section="charts"
-          onclick="switchSection('charts')"
-        >
-          <svg viewBox="0 0 20 20">
-            <path d="M3 16l4-6 4 3 4-8" />
-            <circle cx="15" cy="5" r="1.5" />
-          </svg>
-          Grafik & Analitik
-        </a>
-      </nav>
+      <div class="nav-section">Riwayat Upload</div>
+      <button class="nav-item" data-sec="history" onclick="switchSection('history')">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg>
+        Riwayat Upload
+        <span class="nav-badge" id="nbHistory">0</span>
+      </button>
+    </div>
+  </aside>
 
-      <div class="sidebar-upload">
-        <div class="nav-label">Import Data</div>
-        <div class="upload-zone" id="uploadZone">
-          <svg viewBox="0 0 24 24" width="28" height="28">
-            <path
-              d="M12 2L8 6h3v8h2V6h3L12 2zm-7 13H4v4a1 1 0 001 1h14a1 1 0 001-1v-4h-1"
-            />
-          </svg>
-          <span
-            >Tarik & Lepas CSV / XLS<br /><small
-              >atau klik untuk pilih file</small
-            ></span
-          >
-          <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" />
-        </div>
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div style="flex:1">
+        <div class="topbar-title" id="pageTitle">Ringkasan Umum</div>
+        <div class="topbar-sub" id="pageSub">Tidak ada data</div>
       </div>
-
-      <div class="sidebar-config">
-        <div class="nav-label">Konfigurasi</div>
-        <div class="config-row">
-          <label>Jam Masuk Standar</label>
-          <input type="text" id="cfgStdIn" value="08:00" class="cfg-input" />
-        </div>
-        <div class="config-row">
-          <label>Jam Pulang Standar</label>
-          <input type="text" id="cfgStdOut" value="16:00" class="cfg-input" />
-        </div>
-        <div class="config-row">
-          <label>Batas Lembur (jam)</label>
-          <input type="text" id="cfgOT" value="16:00" class="cfg-input" />
-        </div>
-        <div class="config-row">
-          <label>Toleransi Terlambat</label>
-          <input type="text" id="cfgTol" value="15" class="cfg-input" /><small
-            style="color: var(--muted)"
-          >
-            menit</small
-          >
-        </div>
-        <div class="toggle-row">
-          <label class="toggle"
-            ><input type="checkbox" id="chkDup" checked /><span></span>Hapus
-            duplikat</label
-          >
-          <label class="toggle"
-            ><input type="checkbox" id="chkFmt" checked /><span></span
-            >Normalisasi format jam</label
-          >
-          <label class="toggle"
-            ><input type="checkbox" id="chkDur" checked /><span></span>Hitung
-            durasi kerja</label
-          >
-          <label class="toggle"
-            ><input type="checkbox" id="chkLate" checked /><span></span>Deteksi
-            keterlambatan</label
-          >
-          <label class="toggle"
-            ><input type="checkbox" id="chkOT" checked /><span></span>Hitung jam
-            lembur</label
-          >
-        </div>
+      <div class="filter-wrap" id="filterWrap" style="display:none">
+        <label>Bulan:</label>
+        <select class="filter-sel" id="monthFilter" onchange="applyFilters()">
+          <option value="">Semua Bulan</option>
+        </select>
+        <label>Dari:</label>
+        <input type="date" class="filter-inp" id="dateFrom" onchange="applyFilters()"/>
+        <label>–</label>
+        <input type="date" class="filter-inp" id="dateTo" onchange="applyFilters()"/>
+        <button class="btn btn-ghost" onclick="resetFilters()">Reset</button>
       </div>
-    </aside>
+      <button class="btn btn-ghost" onclick="exportData()" id="btnExport" style="display:none">
+        <svg viewBox="0 0 20 20"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"/></svg>
+        Export
+      </button>
+      <button class="btn btn-ghost" onclick="openAdminModal()" id="btnAdmin" title="Mode Admin" style="display:none">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2L4 5v5c0 4.4 2.6 8.5 6 10 3.4-1.5 6-5.6 6-10V5l-6-3z"/></svg>
+        Admin
+      </button>
+    </header>
 
-    <!-- ═══════════════════════ MAIN ═══════════════════════ -->
-    <main class="main">
-      <!-- TOPBAR -->
-      <header class="topbar">
-        <div class="topbar-left">
-          <div class="page-title" id="pageTitle">Ringkasan</div>
-          <div class="page-sub" id="pageSub">Tidak ada data dimuat</div>
-        </div>
-        <div class="topbar-right">
-          <div class="quality-pill" id="qualityPill">
-            <span class="qp-label">Kualitas Data</span>
-            <span class="qp-score" id="qpScore">—</span>
-          </div>
-          <button class="btn-clean" id="btnClean" onclick="runClean()" disabled>
-            <svg viewBox="0 0 20 20" width="16" height="16">
-              <path d="M4 12l4 4 8-8" />
-            </svg>
-            Bersihkan
-          </button>
-          <button
-            class="btn-download"
-            id="btnDownload"
-            onclick="downloadCSV()"
-            disabled
-          >
-            <svg viewBox="0 0 20 20" width="16" height="16">
-              <path d="M10 3v10M6 9l4 4 4-4M4 17h12" />
-            </svg>
-            Unduh CSV
-          </button>
-        </div>
-      </header>
+    <!-- CONTENT -->
+    <div class="content">
 
-      <!-- ── SECTION: OVERVIEW ── -->
+      <!-- OVERVIEW -->
       <section class="section active" id="sec-overview">
-        <div class="overview-empty" id="overviewEmpty">
-          <div class="empty-illustration">
-            <svg viewBox="0 0 120 100" width="120" height="100">
-              <rect
-                x="10"
-                y="20"
-                width="100"
-                height="65"
-                rx="6"
-                fill="#1e2a3a"
-                stroke="#2d3f55"
-                stroke-width="1.5"
-              />
-              <rect x="20" y="35" width="40" height="6" rx="3" fill="#2d3f55" />
-              <rect x="20" y="47" width="60" height="6" rx="3" fill="#2d3f55" />
-              <rect x="20" y="59" width="50" height="6" rx="3" fill="#2d3f55" />
-              <circle cx="90" cy="30" r="15" fill="#10B981" opacity=".15" />
-              <path
-                d="M83 30l5 5 9-9"
-                stroke="#10B981"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-          <h2>Mulai dengan memuat data</h2>
-          <button
-            class="upload-btn"
-            onclick="document.getElementById('fileInput').click()"
-          >
-            Upload CSV / XLS
+        <div class="empty-state" id="overviewEmpty">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="10" y="15" width="60" height="50" rx="6"/>
+            <path d="M25 35h30M25 45h20M25 55h15"/>
+            <circle cx="58" cy="22" r="10" fill="var(--blue-bg)" stroke="var(--blue)"/>
+            <path d="M53 22l3 3 6-6" stroke="var(--blue)"/>
+          </svg>
+          <h3>Upload data presensi untuk memulai</h3>
+          <p>Format yang didukung: XLSX (Laporan Presensi), XLS, atau CSV dengan kolom ID, Nama, Departemen, Tanggal, Masuk/Terlambat</p>
+          <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+            <svg viewBox="0 0 20 20"><path d="M12 2L8 6h3v8h2V6h3L12 2zm-7 13H4v4a1 1 0 001 1h14a1 1 0 001-1v-4h-1"/></svg>
+            Upload File
           </button>
-          <input
-            type="file"
-            id="fileInput"
-            accept=".csv,.xls,.xlsx"
-            style="display: none"
-          />
         </div>
-        <div id="overviewDash" style="display: none">
+        <div id="overviewDash" style="display:none">
+          <!-- Month tabs -->
+          <div class="month-tabs" id="monthTabs"></div>
+          <!-- KPI Grid -->
           <div class="kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-icon blue">
-                <svg viewBox="0 0 20 20">
-                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0" />
-                </svg>
-              </div>
-              <div class="kpi-val" id="kpiTotal">—</div>
-              <div class="kpi-lbl">Total Baris Data</div>
+            <div class="kpi-card blue">
+              <div class="kpi-icon">👥</div>
+              <div class="kpi-val" id="kpiEmp">—</div>
+              <div class="kpi-lbl">Total Karyawan</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-icon red">
-                <svg viewBox="0 0 20 20">
-                  <circle cx="10" cy="10" r="8" />
-                  <path d="M10 6v5M10 14v.5" />
-                </svg>
-              </div>
-              <div class="kpi-val" id="kpiIssues">—</div>
-              <div class="kpi-lbl">Masalah Ditemukan</div>
+            <div class="kpi-card green">
+              <div class="kpi-icon">✅</div>
+              <div class="kpi-val" id="kpiAttend">—</div>
+              <div class="kpi-lbl">Tingkat Kehadiran</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-icon yellow">
-                <svg viewBox="0 0 20 20">
-                  <path
-                    d="M10 2l2.5 5H18l-4.5 3.5 2 5.5L10 13l-5.5 3 2-5.5L2 7h5.5L10 2z"
-                  />
-                </svg>
-              </div>
+            <div class="kpi-card red">
+              <div class="kpi-icon">⏰</div>
               <div class="kpi-val" id="kpiLate">—</div>
-              <div class="kpi-lbl">Rata² Terlambat</div>
+              <div class="kpi-lbl">Total Terlambat</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-icon green">
-                <svg viewBox="0 0 20 20">
-                  <circle cx="10" cy="10" r="8" />
-                  <path d="M7 10l2 2 4-4" />
-                </svg>
-              </div>
+            <div class="kpi-card yellow">
+              <div class="kpi-icon">⚡</div>
               <div class="kpi-val" id="kpiOT">—</div>
-              <div class="kpi-lbl">Total Jam Lembur</div>
+              <div class="kpi-lbl">Total Menit Lembur</div>
+            </div>
+            <div class="kpi-card purple">
+              <div class="kpi-icon">📅</div>
+              <div class="kpi-val" id="kpiWorkdays">—</div>
+              <div class="kpi-lbl">Hari Kerja</div>
+            </div>
+            <div class="kpi-card orange">
+              <div class="kpi-icon">🏃</div>
+              <div class="kpi-val" id="kpiAbsent">—</div>
+              <div class="kpi-lbl">Total Absen</div>
             </div>
           </div>
-
-          <div class="qual-section">
-            <div class="qual-header">
-              <span>Skor Kualitas Data</span>
-              <span class="qual-score-big" id="qualScoreBig">—</span>
-            </div>
-            <div class="qual-bar-wrap">
-              <div class="qual-bar-fill" id="qualBarFill"></div>
-            </div>
-            <div class="qual-breakdown">
-              <div class="qb-item">
-                <span class="qb-dot dup"></span>
-                <span class="qb-lbl">Duplikat</span>
-                <span class="qb-val" id="qbDup">—</span>
-              </div>
-              <div class="qb-item">
-                <span class="qb-dot miss"></span>
-                <span class="qb-lbl">Data Kosong</span>
-                <span class="qb-val" id="qbMiss">—</span>
-              </div>
-              <div class="qb-item">
-                <span class="qb-dot fmt"></span>
-                <span class="qb-lbl">Format Salah</span>
-                <span class="qb-val" id="qbFmt">—</span>
-              </div>
-              <div class="qb-item">
-                <span class="qb-dot ok"></span>
-                <span class="qb-lbl">Baris Valid</span>
-                <span class="qb-val ok-val" id="qbOK">—</span>
-              </div>
+          <!-- Charts -->
+          <div class="charts-grid wide">
+            <div class="chart-card">
+              <div class="chart-title">📈 Tren Kehadiran Harian</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="chartTrend"></canvas></div>
             </div>
           </div>
-
-          <div class="overview-charts-grid">
+          <div class="charts-grid three">
             <div class="chart-card">
-              <div class="chart-card-title">Distribusi Masalah Data</div>
-              <div class="chart-wrap" style="height: 180px">
-                <canvas id="chartIssueDonut"></canvas>
-              </div>
+              <div class="chart-title">🕗 Distribusi Waktu Masuk</div>
+              <div class="chart-wrap" style="height:180px"><canvas id="chartArrival"></canvas></div>
             </div>
             <div class="chart-card">
-              <div class="chart-card-title">Jam Masuk — Pola Harian</div>
-              <div class="chart-wrap" style="height: 180px">
-                <canvas id="chartArrival"></canvas>
+              <div class="chart-title">⏱ Histogram Keterlambatan (rentang menit)</div>
+              <div class="chart-wrap" id="chartLateBarWrap" style="height:200px"><canvas id="chartLateBar"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">🌙 Tren Total Lembur Harian (menit)</div>
+              <div class="chart-wrap" id="chartOTBarWrap" style="height:200px"><canvas id="chartOTBar"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD -->
+      <section class="section" id="sec-leaderboard">
+        <div class="empty-state" id="lbEmpty">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20 45H10V30h10v15zM35 45H20V15h15v30zM50 45H35V22h15v23z"/>
+          </svg>
+          <h3>Belum ada data leaderboard</h3>
+          <p>Upload data presensi terlebih dahulu</p>
+        </div>
+        <div id="lbDash" style="display:none">
+          <div class="month-tabs" id="lbMonthTabs"></div>
+          <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
+            <div>
+              <div class="chart-title" style="margin-bottom:12px">🏆 Peringkat Performa Karyawan</div>
+              <div class="lb-scroll leaderboard" id="lbList"></div>
+            </div>
+            <div>
+              <div class="chart-card" style="margin-bottom:12px">
+                <div class="chart-title">📊 Skor Performa</div>
+                <div class="chart-wrap" style="height:200px"><canvas id="chartLbRadar"></canvas></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">ℹ️ Cara Perhitungan Skor</div>
+                <div style="font-size:12px;color:var(--text3);line-height:1.8">
+                  <div style="font-weight:600;color:var(--text);margin-bottom:8px">Formula: <span style="font-family:'JetBrains Mono',monospace;color:var(--blue)">Skor = A + B + C</span></div>
+                  <div style="background:var(--panel2);border-radius:6px;padding:10px;margin-bottom:8px">
+                    <div><span style="color:var(--green);font-weight:600">A – Ketepatan Waktu (max 50 poin)</span></div>
+                    <div style="padding-left:12px;font-size:11px">= max(0, 50 − menit_terlambat × 0.5)</div>
+                    <div style="padding-left:12px;font-size:11px;color:var(--text3)">Penalti per menit (presisi tinggi), bukan per kejadian</div>
+                  </div>
+                  <div style="background:var(--panel2);border-radius:6px;padding:10px;margin-bottom:8px">
+                    <div><span style="color:var(--blue);font-weight:600">B – Kehadiran (max 30 poin)</span></div>
+                    <div style="padding-left:12px;font-size:11px">= (hadir / hari_kerja) × 30</div>
+                    <div style="padding-left:12px;font-size:11px;color:var(--text3)">Proporsional terhadap hari kerja periode aktif</div>
+                  </div>
+                  <div style="background:var(--panel2);border-radius:6px;padding:10px;margin-bottom:8px">
+                    <div><span style="color:var(--purple);font-weight:600">C – Bonus Lembur (max 20 poin)</span></div>
+                    <div style="padding-left:12px;font-size:11px">= min(20, (menit_lembur / 300) × 20)</div>
+                    <div style="padding-left:12px;font-size:11px;color:var(--text3)">Lembur ≥ 300 menit (5 jam) = 20 poin penuh</div>
+                  </div>
+                  <div style="padding-top:8px;border-top:1px solid var(--border);font-size:11px">
+                    <span>Toleransi terlambat: </span><strong style="color:var(--yellow)">5 menit</strong><br/>
+                    <span>Tiebreaker: </span><strong style="color:var(--blue)">menit terlambat ↑ → lembur ↓ → absen ↑ → nama A-Z</strong><br/>
+                    <span>Skor maksimal: </span><strong style="color:var(--blue)">100 poin</strong>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── SECTION: RAW ── -->
-      <section class="section" id="sec-raw">
+      <!-- PERSONAL PROFILE -->
+      <section class="section" id="sec-personal">
+        <div class="empty-state" id="personalEmpty">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="30" cy="20" r="10"/><path d="M10 55a20 20 0 0140 0"/>
+          </svg>
+          <h3>Pilih karyawan untuk melihat profil</h3>
+          <p>Upload data dulu, lalu pilih karyawan dari dropdown</p>
+        </div>
+        <div id="personalDash" style="display:none">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--text3)">Karyawan:</label>
+            <select class="filter-sel" id="empSelector" onchange="renderPersonal()" style="min-width:180px"></select>
+            <label style="font-size:12px;color:var(--text3)">Bulan:</label>
+            <select class="filter-sel" id="personalMonth" onchange="renderPersonal()">
+              <option value="">Semua Bulan</option>
+            </select>
+          </div>
+          <div id="personalContent"></div>
+        </div>
+      </section>
+
+      <!-- DATA TABLE -->
+      <section class="section" id="sec-table">
         <div class="table-toolbar">
-          <input
-            type="text"
-            id="rawSearch"
-            class="search-input"
-            placeholder="Cari nama / ID karyawan…"
-            oninput="filterTable('raw')"
-          />
-          <span class="table-info" id="rawTableInfo"></span>
+          <input type="text" class="search-inp" id="tableSearch" placeholder="Cari nama karyawan…" oninput="filterTable()"/>
+          <span class="table-info" id="tableInfo"></span>
         </div>
-        <div class="table-wrap" id="rawTableWrap">
-          <div class="empty-table">Belum ada data dimuat.</div>
+        <div class="table-wrap" id="mainTable"><div style="padding:40px;text-align:center;color:var(--text3)">Belum ada data.</div></div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="section" id="sec-history">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="font-size:15px;font-weight:600">📁 Riwayat Upload File</h3>
+          <button class="btn btn-ghost" onclick="clearHistory()">Hapus Semua</button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div style="padding:40px;text-align:center;color:var(--text3)">Belum ada file yang diupload.</div>
         </div>
       </section>
 
-      <!-- ── SECTION: ISSUES ── -->
-      <section class="section" id="sec-issues">
-        <div id="issueList">
-          <div class="empty-table">Belum ada data dimuat.</div>
-        </div>
-      </section>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div>
 
-      <!-- ── SECTION: CLEAN ── -->
-      <section class="section" id="sec-clean">
-        <div class="table-toolbar">
-          <input
-            type="text"
-            id="cleanSearch"
-            class="search-input"
-            placeholder="Cari nama / ID karyawan…"
-            oninput="filterTable('clean')"
-          />
-          <span class="table-info" id="cleanTableInfo"></span>
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal" style="display:none" onclick="if(event.target===this)closeAdminModal()">
+  <div class="modal-box" style="min-width:360px">
+    <div id="adminPanelLogin">
+      <div class="modal-title">🔒 Login Admin</div>
+      <div class="modal-sub">Masukkan PIN admin untuk mengaktifkan mode admin.</div>
+      <div class="modal-err" id="adminModalErr">PIN salah. Coba lagi.</div>
+      <input class="modal-input" type="password" id="adminPinInput" placeholder="••••" maxlength="12" onkeydown="if(event.key==='Enter')submitPin()"/>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary" onclick="submitPin()">Masuk</button>
+      </div>
+    </div>
+    <div id="adminPanelDash" style="display:none">
+      <div class="modal-title">⚙️ Panel Admin</div>
+      <div style="display:flex;gap:6px;margin:14px 0 18px;border-bottom:1px solid var(--border);padding-bottom:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="tabBtnPin" onclick="switchAdminTab('pin')" style="flex:1;min-width:80px">🔑 PIN</button>
+        <button class="btn btn-ghost" id="tabBtnPhoto" onclick="switchAdminTab('photo')" style="flex:1;min-width:80px">📷 Foto</button>
+        <button class="btn btn-ghost" id="tabBtnResign" onclick="switchAdminTab('resign')" style="flex:1;min-width:80px">👤 Status</button>
+        <button class="btn btn-ghost" id="tabBtnUndo" onclick="switchAdminTab('undo')" style="flex:1;min-width:80px">↩ Undo</button>
+      </div>
+      <!-- TAB: Ganti PIN -->
+      <div id="adminTabPin">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">PIN saat ini dibutuhkan untuk konfirmasi.</div>
+        <input class="modal-input" type="password" id="pinOld" placeholder="PIN lama" maxlength="12" style="margin-bottom:8px"/>
+        <input class="modal-input" type="password" id="pinNew" placeholder="PIN baru" maxlength="12" style="margin-bottom:8px"/>
+        <input class="modal-input" type="password" id="pinNew2" placeholder="Konfirmasi PIN baru" maxlength="12"/>
+        <div class="modal-err" id="pinChangeErr" style="margin-bottom:8px">—</div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeAdminModal()">Tutup</button>
+          <button class="btn btn-primary" onclick="changePin()">Simpan PIN</button>
         </div>
-        <div class="table-wrap" id="cleanTableWrap">
-          <div class="empty-table">Klik "Bersihkan" untuk memproses data.</div>
-        </div>
-      </section>
-
-      <!-- ── SECTION: CHARTS ── -->
-      <section class="section" id="sec-charts">
-        <div id="chartsEmpty" class="empty-table" style="padding: 60px 20px">
-          Muat data terlebih dahulu untuk melihat grafik.
-        </div>
-        <div id="chartsDash" style="display: none">
-          <div class="charts-grid-full">
-            <div class="chart-card wide">
-              <div class="chart-card-title">Tren Kehadiran Harian</div>
-              <div class="chart-wrap" style="height: 240px">
-                <canvas id="chartTrend"></canvas>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-card-title">Jam Lembur per Karyawan</div>
-              <div class="chart-wrap" style="height: 240px">
-                <canvas id="chartOT"></canvas>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-card-title">Frekuensi Keterlambatan</div>
-              <div class="chart-wrap" style="height: 240px">
-                <canvas id="chartLate"></canvas>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-card-title">Distribusi Durasi Kerja</div>
-              <div class="chart-wrap" style="height: 240px">
-                <canvas id="chartDurDist"></canvas>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-card-title">Kualitas Data per Kolom</div>
-              <div class="chart-wrap" style="height: 240px">
-                <canvas id="chartColQuality"></canvas>
-              </div>
-            </div>
+      </div>
+      <!-- TAB: Foto Karyawan -->
+      <div id="adminTabPhoto" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Pilih karyawan lalu upload foto.</div>
+        <select class="filter-sel" id="adminEmpPhotoSelect" style="width:100%;margin-bottom:10px"></select>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div id="adminPhotoPreview" style="width:56px;height:56px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0">👤</div>
+          <div style="flex:1">
+            <button class="btn btn-ghost" onclick="document.getElementById('adminAvatarFile').click()" style="width:100%;justify-content:center;margin-bottom:6px">📁 Pilih Foto</button>
+            <button class="btn btn-ghost" onclick="removeEmpPhoto()" style="width:100%;justify-content:center;color:var(--red)">🗑 Hapus Foto</button>
           </div>
         </div>
-      </section>
-    </main>
+        <input type="file" id="adminAvatarFile" accept="image/*" style="display:none" onchange="adminHandlePhoto(event)"/>
+        <div class="modal-actions"><button class="btn btn-ghost" onclick="closeAdminModal()">Tutup</button></div>
+      </div>
+      <!-- TAB: Status Karyawan -->
+      <div id="adminTabResign" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Karyawan resign tetap tersimpan di data historis untuk keperluan audit. Bisa di-restore kapan saja.</div>
+        <div style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r2)" id="adminResignList"></div>
+        <div class="modal-actions" style="margin-top:12px"><button class="btn btn-ghost" onclick="closeAdminModal()">Tutup</button></div>
+      </div>
+      <!-- TAB: Undo -->
+      <div id="adminTabUndo" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Riwayat 20 perubahan terakhir. Klik <strong>Undo</strong> untuk membatalkan perubahan.</div>
+        <div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r2)" id="adminUndoList"></div>
+        <div class="modal-actions" style="margin-top:12px">
+          <button class="btn btn-ghost" onclick="closeAdminModal()">Tutup</button>
+          <button class="btn btn-ghost" style="color:var(--red)" onclick="clearUndoHistory()">Hapus Riwayat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script src="app.js"></script>
-  </body>
+<!-- AVATAR INPUT -->
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"/>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let state = {
+  raw: [],        // parsed exception stat rows
+  stats: [],      // parsed stat absen
+  filtered: [],   // filtered raw
+  employees: [],  // unique employees list
+  empMaster: [],  // master list dari Lap. Log Absen (urutan sheet)
+  months: [],     // unique months
+  tanggalMerahDates: new Set(), // tanggal merah terdeteksi
+  activeMonth: '',
+  dateFrom: '', dateTo: '',
+  history: JSON.parse(localStorage.getItem('pres_history') || '[]'),
+  charts: {},
+  resignedIds: JSON.parse(localStorage.getItem('pres_resigned') || '[]'),
+  avatars: JSON.parse(localStorage.getItem('pres_avatars') || '{}'),
+  isAdmin: false,
+  adminPin: localStorage.getItem('pres_admin_pin') || '1234',
+  holidays: new Set(), // computed public holidays + weekend
+};
+
+// ══════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════
+const STD_IN   = 8 * 60;       // 08:00 — patokan masuk
+const STD_OUT  = 16 * 60;      // 16:00 — patokan pulang (untuk single punch)
+const OT_START = 17 * 60;      // 17:00 — lembur dihitung setelah ini
+const LATE_TOL = 5;            // toleransi 5 menit → terlambat jika masuk > 08:05
+const LATE_LIMIT = STD_IN + LATE_TOL; // 08:05 in minutes
+
+// ══════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  localStorage.setItem('pres_theme', next);
+  updateThemeIcon();
+  Object.values(state.charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  state.charts = {};
+  renderCurrentSection();
+}
+function updateThemeIcon() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  document.getElementById('themeIcon').innerHTML = dark
+    ? '<circle cx="10" cy="10" r="4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41"/>'
+    : '<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>';
+}
+const savedTheme = localStorage.getItem('pres_theme');
+if (savedTheme) { document.documentElement.dataset.theme = savedTheme; updateThemeIcon(); }
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+let currentSection = 'overview';
+function switchSection(sec) {
+  currentSection = sec;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  document.querySelectorAll('.section').forEach(el => el.classList.toggle('active', el.id === 'sec-' + sec));
+  const titles = {overview:'Ringkasan Umum',leaderboard:'Leaderboard Performa',personal:'Profil Karyawan',table:'Data Presensi',history:'Riwayat Upload'};
+  document.getElementById('pageTitle').textContent = titles[sec] || sec;
+  const hasData = state.raw.length > 0;
+  document.getElementById('filterWrap').style.display = hasData && ['overview','leaderboard','table'].includes(sec) ? '' : 'none';
+  document.getElementById('btnExport').style.display = hasData && sec === 'table' ? '' : 'none';
+  renderCurrentSection();
+}
+function goToProfile(empId) {
+  switchSection('personal');
+  const sel = document.getElementById('empSelector');
+  if (sel) { sel.value = empId; renderPersonal(); }
+}
+function renderCurrentSection() {
+  if (currentSection === 'overview') renderOverview();
+  else if (currentSection === 'leaderboard') renderLeaderboard();
+  else if (currentSection === 'personal') renderPersonalSection();
+  else if (currentSection === 'table') renderTable();
+  else if (currentSection === 'history') renderHistory();
+}
+
+// ══════════════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════════════
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary', cellDates: true });
+
+      // ── Deteksi duplikat bulan sebelum parsing ──
+      // Cek tahun-bulan dari nama file atau header sheet
+      let detectedYM = null;
+      const fnMatch = (file.name || '').match(/(\d{4})[-_](\d{2})/);
+      if (fnMatch) detectedYM = `${fnMatch[1]}-${fnMatch[2]}`;
+      if (!detectedYM) {
+        // Coba cek dari sheet names
+        const m = wb.SheetNames.join(' ').match(/(\d{4})[-_](\d{2})/);
+        if (m) detectedYM = `${m[1]}-${m[2]}`;
+      }
+      if (!detectedYM) {
+        // Coba cek dari isi sheet header
+        for (const sn of wb.SheetNames) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: null });
+          for (let ri = 0; ri < Math.min(5, rows.length); ri++) {
+            const row = rows[ri] || [];
+            for (const cell of row) {
+              if (!cell) continue;
+              const m2 = String(cell).match(/(\d{4})-(\d{2})-\d{2}/);
+              if (m2) { detectedYM = `${m2[1]}-${m2[2]}`; break; }
+            }
+            if (detectedYM) break;
+          }
+          if (detectedYM) break;
+        }
+      }
+
+      if (detectedYM && state.months.includes(detectedYM)) {
+        const mLabel = monthLabel(detectedYM);
+        const confirm = window.confirm(
+          `⚠️ PERINGATAN: Data bulan ${mLabel} sudah pernah diupload sebelumnya!\n\n` +
+          `Mengupload ulang akan menambah data duplikat.\n\n` +
+          `Klik OK untuk tetap lanjut upload, atau Cancel untuk membatalkan.`
+        );
+        if (!confirm) return;
+      }
+
+      parseWorkbook(wb, file.name);
+      addHistory(file.name, file.size, state.raw.length);
+    } catch (err) {
+      alert('Gagal membaca file: ' + err.message);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// ══════════════════════════════════════════════
+// PARSER UTAMA: Lap. Log Absen
+// Format sel: "07:3416:00" = masuk 07:34, keluar 16:00
+// Bisa multi-stamp: "07:3416:1316:19" = masuk 07:34, keluar 16:19 (terakhir)
+// ══════════════════════════════════════════════
+function parseLogCell(cellVal) {
+  if (!cellVal) return { masuk: null, keluar: null, status: null };
+  const s = String(cellVal).trim();
+  if (s === 'S' || s === 'SAKIT') return { masuk: null, keluar: null, status: 'S' };
+  if (/^(CUTI|IZIN)/i.test(s)) return { masuk: null, keluar: null, status: 'CUTI' };
+
+  // Extract all HH:MM timestamps
+  const times = (s.match(/\d{2}:\d{2}/g) || []);
+  if (!times.length) return { masuk: null, keluar: null, status: null };
+
+  // Pisahkan jam masuk (< 14:00) dan jam keluar (>= 14:00)
+  const masukArr  = times.filter(t => parseInt(t) < 14);
+  const keluarArr = times.filter(t => parseInt(t) >= 14);
+
+  const masuk  = masukArr.length  ? masukArr[0]         : null; // ambil paling pertama
+  const keluar = keluarArr.length ? keluarArr[keluarArr.length - 1] : null; // ambil paling terakhir
+
+  // Jika hanya satu waktu
+  if (times.length === 1) {
+    const h = parseInt(times[0]);
+    if (h >= 14) return { masuk: null, keluar: times[0], status: null };
+    return { masuk: times[0], keluar: null, status: null };
+  }
+
+  return { masuk, keluar, status: null };
+}
+
+function parseWorkbook(wb, fname) {
+  // ACCUMULATE across uploads instead of resetting
+  const existingDates = new Set(state.raw.map(r => r.date + '|' + r.id));
+  let newRows = [];
+  let newStats = [];
+
+  // Keep existing empMaster and accumulate (don't reset on each upload)
+  // state.empMaster preserved — only tanggalMerahDates is per-file
+  state.tanggalMerahDates = new Set();
+
+  // ── 1. PRIORITAS: Lap. Log Absen (data paling akurat) ──
+  const logSheet = wb.SheetNames.find(n => n.toLowerCase().includes('lap') && n.toLowerCase().includes('log'));
+
+  // ── 2. Fallback: Exception Stat ──
+  const excSheet = wb.SheetNames.find(n => n.toLowerCase().includes('exception') || n.toLowerCase().includes('exc'));
+  const statSheet = wb.SheetNames.find(n => n.toLowerCase().includes('stat') && n.toLowerCase().includes('absen'));
+
+  if (logSheet) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[logSheet], { header: 1, defval: null });
+
+    // Row index 1 (row 2 Excel) = tanggal kolom 0..27 → hari 1..28
+    const dateRow = rows[1] || [];
+    // Buat mapping: kolom index → tanggal string "YYYY-MM-DD"
+    // Bulan diambil dari nama file atau dari data
+    // Cari tahun+bulan dari nama sheet atau file
+    let year = new Date().getFullYear(), month = new Date().getMonth() + 1; // default to current
+    // Priority 1: read from the "Stat. Tgl" header cell in the sheet
+    let foundFromSheet = false;
+    for (let ri = 0; ri < Math.min(5, rows.length); ri++) {
+      const row = rows[ri];
+      if (!row) continue;
+      for (const cell of row) {
+        if (!cell) continue;
+        const s = String(cell);
+        const m1 = s.match(/(\d{4})-(\d{2})-\d{2}/);
+        if (m1) { year = parseInt(m1[1]); month = parseInt(m1[2]); foundFromSheet = true; break; }
+      }
+      if (foundFromSheet) break;
+    }
+    // Priority 2: filename pattern
+    if (!foundFromSheet) {
+      const fnMatch = (fname || '').match(/(\d{4})[-_](\d{2})/);
+      if (fnMatch) { year = parseInt(fnMatch[1]); month = parseInt(fnMatch[2]); }
+      else {
+        const m = wb.SheetNames.join(' ').match(/(\d{4})[-_](\d{2})/);
+        if (m) { year = parseInt(m[1]); month = parseInt(m[2]); }
+      }
+    }
+
+    // Build col→date map from dateRow
+    const colDateMap = {};
+    dateRow.forEach((v, ci) => {
+      if (v && !isNaN(Number(v))) {
+        const day = parseInt(v);
+        if (day >= 1 && day <= 31) {
+          // JANGAN pakai toISOString() → kena UTC offset bug (geser -1 hari di UTC+7)
+          // Gunakan format manual supaya timezone-safe
+          const mm = String(month).padStart(2, '0');
+          const dd = String(day).padStart(2, '0');
+          colDateMap[ci] = `${year}-${mm}-${dd}`;
+        }
+      }
+    });
+
+    // ── Karyawan yang dikecualikan (tidak ada di sistem) ──
+    const EXCLUDE_NAMES = ['AYU', 'KRISMAWATI', 'RIRIS'];
+
+    // ── Pass 1: kumpulkan semua data mentah per tanggal per karyawan ──
+    const rawByDate = {}; // dateStr → [{ empId, cellVal }]
+    const empBlocks = []; // array { empId, empNama, empDept, dRow }
+
+    let i = 2;
+    while (i < rows.length) {
+      const hRow = rows[i];
+      if (!hRow) { i++; continue; }
+
+      if (hRow[0] === 'ID:') {
+        const empId   = String(hRow[2] || '').trim();
+        const empNama = String(hRow[10] || '').trim().toUpperCase();
+        const empDept = String(hRow[20] || 'Perusahaan').trim();
+        const dRow    = rows[i + 1] || [];
+
+        // Skip karyawan yang dikecualikan
+        if (!empNama || !empId || EXCLUDE_NAMES.includes(empNama)) {
+          i += 2; continue;
+        }
+
+        empBlocks.push({ empId, empNama, empDept, dRow });
+
+        // Kumpulkan data per tanggal untuk deteksi tanggal merah
+        Object.entries(colDateMap).forEach(([ci, dateStr]) => {
+          const cellVal = dRow[parseInt(ci)];
+          if (!rawByDate[dateStr]) rawByDate[dateStr] = [];
+          rawByDate[dateStr].push({ empId, cellVal });
+        });
+
+        i += 2;
+      } else { i++; }
+    }
+
+    // ── Deteksi tanggal merah: weekday dimana SEMUA karyawan tidak punya log ──
+    const tanggalMerah = new Set();
+    Object.entries(rawByDate).forEach(([dateStr, entries]) => {
+      const dow = getDow(dateStr);
+      const isWeekday = dow >= 1 && dow <= 5;
+      if (!isWeekday) return;
+      // Cek apakah semua karyawan kosong di tanggal ini
+      const anyHasLog = entries.some(e => {
+        const v = e.cellVal;
+        if (!v) return false;
+        const s = String(v).trim();
+        return s.length > 0 && s !== 'null';
+      });
+      if (!anyHasLog) tanggalMerah.add(dateStr);
+    });
+    // Simpan ke state untuk digunakan di rendering
+    tanggalMerah.forEach(d => state.tanggalMerahDates.add(d));
+
+    // ── Pass 2: parse tiap karyawan + skip tanggal merah ──
+    empBlocks.forEach(({ empId, empNama, empDept, dRow }) => {
+      // Tambah ke empMaster
+      if (!state.empMaster.find(e => e.id === empId)) {
+        state.empMaster.push({ id: empId, nama: empNama, dept: empDept });
+      }
+
+      Object.entries(colDateMap).forEach(([ci, dateStr]) => {
+        const colIdx  = parseInt(ci);
+        const cellVal = dRow[colIdx];
+        const dow     = getDow(dateStr);
+        const isWeekend = dow === 0 || dow === 6;
+
+        // Skip weekend & tanggal merah — tidak masuk ke state.raw sama sekali
+        if (isWeekend || tanggalMerah.has(dateStr)) return;
+
+        const { masuk: rawMasuk, keluar: rawKeluar, status } = parseLogCell(cellVal);
+
+        // ── Logika masuk/keluar dengan patokan 08:00 / 16:00 ──
+        let masuk  = rawMasuk;
+        let keluar = rawKeluar;
+
+        // Jika hanya ada satu punch:
+        // - hanya masuk → keluar = null (patokan 16:00 untuk hitung jam kerja)
+        // - hanya keluar → masuk = null (patokan 08:00 untuk hitung jam kerja)
+        // Tetap dianggap HADIR, bukan absen
+
+        let isHadir = false;
+        let statusNote = status;
+
+        if (status === 'S' || status === 'CUTI') {
+          isHadir = false;
+        } else if (masuk || keluar) {
+          isHadir = true; // ada satu saja punch → hadir
+        } else {
+          // Tidak ada data sama sekali di hari kerja = ABSEN
+          isHadir = false;
+        }
+
+        // ── Keterlambatan: terlambat jika masuk > 08:05 ──
+        let terlambat_min = 0;
+        if (masuk && isHadir) {
+          const [mh, mm] = masuk.split(':').map(Number);
+          const masukMin = mh * 60 + mm;
+          if (masukMin > LATE_LIMIT) terlambat_min = masukMin - LATE_LIMIT;
+        }
+
+        // ── Overtime: lembur jika keluar > 17:00 ──
+        let ot_min = 0;
+        if (keluar && isHadir) {
+          const [kh, km] = keluar.split(':').map(Number);
+          const keluarMin = kh * 60 + km;
+          if (keluarMin > OT_START) ot_min = keluarMin - OT_START;
+        }
+
+        // ── Total jam kerja (patokan 08:00 / 16:00 jika single punch) ──
+        let total_min = 0;
+        if (isHadir) {
+          const mStr = masuk  || '08:00';
+          const kStr = keluar || '16:00';
+          const [mh, mm] = mStr.split(':').map(Number);
+          const [kh, km] = kStr.split(':').map(Number);
+          total_min = Math.max(0, (kh * 60 + km) - (mh * 60 + mm));
+        }
+
+        const key = dateStr + '|' + empId;
+        if (!existingDates.has(key)) {
+          existingDates.add(key);
+          newRows.push({
+            id: empId,
+            nama: empNama,
+            dept: empDept,
+            date: dateStr,
+            masuk,
+            keluar,
+            terlambat_min,
+            pulang_awal_min: 0,
+            absen_min: isHadir ? 0 : 480,
+            total_min,
+            isHadir,
+            ot_min,
+            isWeekend: false, // sudah di-skip weekend di atas
+            statusNote,
+            isTanggalMerah: false
+          });
+        }
+      });
+    });
+  }
+
+  // ── Fallback: Exception Stat (jika Lap. Log tidak ada) ──
+  if (newRows.length === 0 && excSheet) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[excSheet], { header: 1, defval: null });
+    // Find data start row (after headers)
+    let startRow = 4; // typical
+    for (let i = 0; i < Math.min(10, rows.length); i++) {
+      if (rows[i] && (typeof rows[i][0] === 'number' || (typeof rows[i][0] === 'string' && /^\d+$/.test(rows[i][0])))) {
+        startRow = i; break;
+      }
+    }
+    for (let i = startRow; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r[0] == null) continue;
+      const id = String(r[0]).trim();
+      const nama = String(r[1] || '').trim().toUpperCase();
+      if (!nama || nama === 'NAN' || nama === 'UNDEFINED') continue;
+      const dept = String(r[2] || 'Perusahaan').trim();
+      let date = r[3];
+      if (!date) continue;
+      if (typeof date === 'number') date = XLSX.SSF.parse_date_code(date);
+      const dateStr = formatDateStr(date);
+      if (!dateStr) continue;
+      const masuk = parseTimeStr(r[4]);
+      const keluar = parseTimeStr(r[5]);
+      const terlambat_min = toNum(r[8]);
+      const pulang_awal_min = toNum(r[9]);
+      const absen_min = toNum(r[10]);
+      const total_min = toNum(r[11]);
+      const isHadir = absen_min < 480; // less than full day absent
+      const isAbsen = absen_min >= 480 && !masuk && !keluar;
+      // Calc overtime from check-out time if available
+      let ot_min = 0;
+      if (keluar) {
+        const kelParts = keluar.split(':');
+        const kelMinutes = parseInt(kelParts[0]) * 60 + parseInt(kelParts[1]);
+        if (kelMinutes > OT_START) ot_min = kelMinutes - OT_START;
+      }
+      // Detect weekend
+      const dow = getDow(dateStr); // 0=Sun,6=Sat
+      const isWeekend = dow === 0 || dow === 6;
+      const key = dateStr + '|' + id;
+      if (!existingDates.has(key)) {
+        newRows.push({ id, nama, dept, date: dateStr, masuk, keluar, terlambat_min, pulang_awal_min, absen_min, total_min, isHadir: !isAbsen, ot_min, isWeekend });
+      }
+    }
+  }
+
+  // Parse Stat.Absen for summary stats
+  if (statSheet) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[statSheet], { header: 1, defval: null });
+    let startRow = 4;
+    for (let i = 0; i < Math.min(10, rows.length); i++) {
+      if (rows[i] && typeof rows[i][0] === 'number') { startRow = i; break; }
+    }
+    for (let i = startRow; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r[0] == null || isNaN(Number(r[0]))) continue;
+      const nama = String(r[1] || '').trim().toUpperCase();
+      if (!nama || nama === 'NAN') continue;
+      // Parse hari hadir from format "22/2" (workday/holiday attended)
+      const hariAbsenStr = String(r[11] || '');
+      const hariParts = hariAbsenStr.split('/');
+      const hari_hadir = parseInt(hariParts[0]) || 0;
+      const jam_real_str = String(r[4] || '0:00');
+      const jam_real_min = parseHHMM(jam_real_str);
+      newStats.push({
+        id: String(r[0]).trim(),
+        nama,
+        dept: String(r[2] || 'Perusahaan').trim(),
+        jam_kerja_min: jam_real_min,
+        terlambat_kali: toNum(r[5]),
+        terlambat_min: toNum(r[6]),
+        pulang_awal_kali: toNum(r[7]),
+        pulang_awal_min: toNum(r[8]),
+        ot_hk_str: String(r[9] || '0:00'),
+        ot_min: parseHHMM(String(r[9] || '0:00')),
+        hari_hadir,
+        keluar_hari: toNum(r[12]),
+        absen_hari: toNum(r[13]),
+        afl_hari: toNum(r[14]),
+      });
+    }
+  }
+
+  // Merge new rows into state
+  state.raw = [...state.raw, ...newRows];
+  // Merge stats: new overrides old per id
+  const statMap = {};
+  state.stats.forEach(s => statMap[s.id] = s);
+  newStats.forEach(s => statMap[s.id] = s);
+  state.stats = Object.values(statMap);
+
+  // Fallback: if no exception sheet, try to build from any sheet
+  if (state.raw.length === 0 && newRows.length === 0) {
+    // Try generic CSV-like parsing
+    for (const sn of wb.SheetNames) {
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: null });
+      for (const r of rows) {
+        if (!r || r.length < 4) continue;
+        const hasDate = r.some(v => v instanceof Date || (typeof v === 'string' && /\d{4}-\d{2}-\d{2}/.test(v)));
+        const hasName = r.some(v => typeof v === 'string' && v.length > 2 && v.length < 30 && /[A-Za-z]/.test(v));
+        if (hasDate && hasName) {
+          const nama = String(r.find(v => typeof v === 'string' && v.length > 2 && /[A-Za-z]/.test(v)) || '').toUpperCase();
+          const dateVal = r.find(v => v instanceof Date || (typeof v === 'string' && /\d{4}-\d{2}-\d{2}/.test(v)));
+          const dateStr = formatDateStr(dateVal);
+          if (nama && dateStr) {
+            const dow = getDow(dateStr);
+            const key = dateStr + '|?';
+            if (!existingDates.has(key)) {
+              newRows.push({ id: '?', nama, dept: 'N/A', date: dateStr, masuk: null, keluar: null, terlambat_min: 0, absen_min: 0, total_min: 480, isHadir: true, ot_min: 0, isWeekend: dow===0||dow===6 });
+            }
+          }
+        }
+      }
+      if (newRows.length > 10) break;
+    }
+    state.raw = [...state.raw, ...newRows];
+  }
+
+  // Derive employees: utamakan dari empMaster (Lap. Log Absen), fallback dari raw
+  if (state.empMaster.length > 0) {
+    // Gunakan daftar dari sheet Lap. Log Absen (urutan & nama sesuai sheet)
+    // Pastikan semua ID di raw juga tercakup
+    const masterIds = new Set(state.empMaster.map(e => e.id));
+    state.raw.forEach(r => {
+      if (!masterIds.has(r.id)) {
+        state.empMaster.push({ id: r.id, nama: r.nama, dept: r.dept });
+        masterIds.add(r.id);
+      }
+    });
+    state.employees = [...state.empMaster].sort((a, b) => a.nama.localeCompare(b.nama));
+  } else {
+    const empMap = {};
+    state.raw.forEach(r => { if (!empMap[r.id]) empMap[r.id] = { id: r.id, nama: r.nama, dept: r.dept }; });
+    state.employees = Object.values(empMap).sort((a, b) => a.nama.localeCompare(b.nama));
+  }
+
+  const monthSet = new Set();
+  state.raw.forEach(r => { if (r.date) monthSet.add(r.date.substring(0, 7)); });
+  state.months = [...monthSet].sort();
+
+  state.filtered = state.raw.filter(r => !r.isWeekend);
+  state.activeMonth = '';
+
+  // Update UI
+  document.getElementById('nbEmp').textContent = state.employees.length;
+  document.getElementById('nbRows').textContent = state.raw.length;
+  updateMonthFilters();
+  populateEmpSelectors();
+
+  // Show data elements
+  document.getElementById('overviewEmpty').style.display = 'none';
+  document.getElementById('overviewDash').style.display = '';
+  document.getElementById('filterWrap').style.display = '';
+  document.getElementById('btnExport').style.display = '';
+  document.getElementById('lbEmpty').style.display = 'none';
+  document.getElementById('lbDash').style.display = '';
+  document.getElementById('personalEmpty').style.display = 'none';
+  document.getElementById('personalDash').style.display = '';
+
+  document.getElementById('pageSub').textContent = `${state.employees.length} karyawan · ${state.raw.length} catatan · ${state.months.length} bulan`;
+  document.getElementById('btnAdmin').style.display = '';
+
+  renderCurrentSection();
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ── getDow: timezone-safe day-of-week dari "YYYY-MM-DD" ──
+// Jangan pakai new Date(dateStr).getDay() → kena UTC offset bug di Asia/Jakarta
+function getDow(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay(); // 0=Min,6=Sab
+}
+function isWeekendDate(dateStr) { const d = getDow(dateStr); return d === 0 || d === 6; }
+// ══════════════════════════════════════════════
+function toNum(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function parseTimeStr(v) {
+  if (!v) return null;
+  if (typeof v === 'string' && /^\d{1,2}:\d{2}/.test(v)) return v.substring(0, 5);
+  if (v instanceof Date) return String(v.getHours()).padStart(2,'0') + ':' + String(v.getMinutes()).padStart(2,'0');
+  return null;
+}
+function parseHHMM(s) {
+  if (!s || s === 'NaN' || s === 'null') return 0;
+  const parts = String(s).split(':');
+  if (parts.length < 2) return 0;
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+function formatDateStr(d) {
+  if (!d) return null;
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}/.test(d)) return d.substring(0, 10);
+  if (d instanceof Date) {
+    // Jangan pakai toISOString() → UTC offset bug. Gunakan lokal date parts.
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  }
+  if (typeof d === 'object' && d.y) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  return null;
+}
+function fmtMin(m) {
+  if (m < 60) return m + 'm';
+  const h = Math.floor(m / 60), mn = m % 60;
+  return mn > 0 ? `${h}j ${mn}m` : `${h}j`;
+}
+function monthLabel(ym) {
+  const [y, m] = ym.split('-');
+  const names = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  return `${names[parseInt(m) - 1]} ${y}`;
+}
+function getThemeColor(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function initChart(id, config) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (state.charts[id]) { state.charts[id].destroy(); }
+  const ctx = el.getContext('2d');
+  const c = new Chart(ctx, config);
+  state.charts[id] = c;
+  return c;
+}
+function chartDefaults() {
+  return {
+    color: getThemeColor('--text2'),
+    scales: {
+      x: { grid: { color: getThemeColor('--border') }, ticks: { color: getThemeColor('--text3'), font: { size: 10, family: 'Sora' } } },
+      y: { grid: { color: getThemeColor('--border') }, ticks: { color: getThemeColor('--text3'), font: { size: 10, family: 'Sora' } } }
+    },
+    plugins: { legend: { labels: { color: getThemeColor('--text2'), font: { size: 11, family: 'Sora' }, boxWidth: 12 } } }
+  };
+}
+
+// ══════════════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════════════
+function updateMonthFilters() {
+  const opts = `<option value="">Semua Bulan</option>` + state.months.map(m => `<option value="${m}">${monthLabel(m)}</option>`).join('');
+  document.getElementById('monthFilter').innerHTML = opts;
+  document.getElementById('personalMonth').innerHTML = opts;
+  renderMonthTabs('monthTabs');
+  renderMonthTabs('lbMonthTabs');
+}
+function renderMonthTabs(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = `<button class="month-tab ${state.activeMonth === '' ? 'active' : ''}" onclick="setActiveMonth('')">Semua</button>` +
+    state.months.map(m => `<button class="month-tab ${state.activeMonth === m ? 'active' : ''}" onclick="setActiveMonth('${m}')">${monthLabel(m)}</button>`).join('');
+}
+function setActiveMonth(m) {
+  state.activeMonth = m;
+  document.getElementById('monthFilter').value = m;
+  applyFilters();
+}
+function applyFilters() {
+  const mf = document.getElementById('monthFilter').value;
+  state.activeMonth = mf;
+  state.dateFrom = document.getElementById('dateFrom').value;
+  state.dateTo = document.getElementById('dateTo').value;
+  renderMonthTabs('monthTabs');
+  renderMonthTabs('lbMonthTabs');
+  state.filtered = state.raw.filter(r => {
+    if (r.isWeekend) return false; // skip weekends — not a work day
+    if (mf && !r.date.startsWith(mf)) return false;
+    if (state.dateFrom && r.date < state.dateFrom) return false;
+    if (state.dateTo && r.date > state.dateTo) return false;
+    return true;
+  });
+  renderCurrentSection();
+}
+function resetFilters() {
+  state.activeMonth = '';
+  state.dateFrom = '';
+  state.dateTo = '';
+  document.getElementById('monthFilter').value = '';
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  state.filtered = state.raw.filter(r => !r.isWeekend);
+  renderMonthTabs('monthTabs');
+  renderMonthTabs('lbMonthTabs');
+  renderCurrentSection();
+}
+function getFilteredStats() {
+  // ALWAYS re-aggregate from state.filtered (source of truth for OT, names, etc.)
+  // Only include employees who have at least one record in the filtered period
+  const empMap = {};
+
+  // Only seed from employees who appear in state.filtered
+  const activeIds = new Set(state.filtered.map(r => r.id));
+
+  state.filtered.forEach(r => {
+    if (!empMap[r.id]) {
+      empMap[r.id] = { id: r.id, nama: r.nama, dept: r.dept, hari_hadir: 0, absen_hari: 0, terlambat_kali: 0, terlambat_min: 0, pulang_awal_kali: 0, pulang_awal_min: 0, ot_min: 0, jam_kerja_min: 0 };
+    }
+    const e = empMap[r.id];
+    e.nama = r.nama;
+    if (r.isHadir) { e.hari_hadir++; e.jam_kerja_min += (r.total_min || 0); } else e.absen_hari++;
+    if (r.terlambat_min > LATE_TOL) { e.terlambat_kali++; e.terlambat_min += r.terlambat_min; }
+    if (r.pulang_awal_min > 0) { e.pulang_awal_kali++; e.pulang_awal_min += r.pulang_awal_min; }
+    e.ot_min += r.ot_min || 0;
+  });
+  return Object.values(empMap);
+}
+
+// ══════════════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════════════
+function renderOverview() {
+  const data = state.filtered;
+  if (!data.length) return;
+  const stats = getFilteredStats();
+  const totalRows = data.length;
+  const totalHadir = data.filter(r => r.isHadir).length;
+  const totalAbsen = data.filter(r => !r.isHadir).length;
+  const totalLate = data.filter(r => r.terlambat_min > LATE_TOL).length;
+  const totalOTMin = data.reduce((s, r) => s + (r.ot_min || 0), 0);
+  const attendRate = totalRows ? Math.round(totalHadir / totalRows * 100) : 0;
+  const workdays = new Set(data.filter(r => r.isHadir).map(r => r.date)).size;
+
+  document.getElementById('kpiEmp').textContent = state.employees.length;
+  document.getElementById('kpiAttend').textContent = attendRate + '%';
+  document.getElementById('kpiLate').textContent = totalLate;
+  document.getElementById('kpiOT').textContent = fmtMin(totalOTMin);
+  document.getElementById('kpiWorkdays').textContent = workdays;
+  document.getElementById('kpiAbsent').textContent = totalAbsen;
+
+  const isAllMonths = !state.activeMonth; // true = semua bulan → tampilkan per bulan
+
+  const blue = getThemeColor('--blue');
+  const red = getThemeColor('--red');
+  const yellow = getThemeColor('--yellow');
+  const green = getThemeColor('--green');
+  const purple = getThemeColor('--purple');
+
+  // ── Tren Kehadiran: SELALU line chart, sumbu X per bulan (Semua) atau per hari (bulan tertentu) ──
+  if (isAllMonths) {
+    // Agregat per bulan → line chart
+    const monthMapTrend = {};
+    data.forEach(r => {
+      const m = r.date.substring(0, 7);
+      if (!monthMapTrend[m]) monthMapTrend[m] = { hadir: 0, absen: 0 };
+      if (r.isHadir) monthMapTrend[m].hadir++; else monthMapTrend[m].absen++;
+    });
+    const sortedMonths = Object.keys(monthMapTrend).sort();
+    initChart('chartTrend', {
+      type: 'line',
+      data: {
+        labels: sortedMonths.map(monthLabel),
+        datasets: [
+          { label: 'Hadir', data: sortedMonths.map(m => monthMapTrend[m].hadir), borderColor: blue, backgroundColor: blue + '20', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: blue },
+          { label: 'Absen', data: sortedMonths.map(m => monthMapTrend[m].absen), borderColor: red, backgroundColor: red + '20', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: red }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index' }, ...chartDefaults(),
+        scales: { ...chartDefaults().scales,
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jumlah', color: getThemeColor('--text3'), font:{size:10} } } } }
+    });
+  } else {
+    // Per hari dalam bulan → line chart
+    const dayMapTrend = {};
+    data.forEach(r => {
+      if (!dayMapTrend[r.date]) dayMapTrend[r.date] = { hadir: 0, absen: 0 };
+      if (r.isHadir) dayMapTrend[r.date].hadir++; else dayMapTrend[r.date].absen++;
+    });
+    const sortedDates = Object.keys(dayMapTrend).sort();
+    initChart('chartTrend', {
+      type: 'line',
+      data: {
+        labels: sortedDates.map(d => d.substring(5)),
+        datasets: [
+          { label: 'Hadir', data: sortedDates.map(d => dayMapTrend[d].hadir), borderColor: blue, backgroundColor: blue + '20', fill: true, tension: .35, pointRadius: 2 },
+          { label: 'Absen', data: sortedDates.map(d => dayMapTrend[d].absen), borderColor: red, backgroundColor: red + '20', fill: true, tension: .35, pointRadius: 2 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index' }, ...chartDefaults(),
+        scales: { ...chartDefaults().scales,
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jumlah', color: getThemeColor('--text3'), font:{size:10} } } } }
+    });
+  }
+
+  // ── Distribusi Waktu Masuk: hanya ketika filter bulan spesifik ──
+  // (rentang jam masuk, sumbu x=rentang, y=jumlah orang)
+  const arrivalBuckets = { '< 07:00': 0, '07:00-07:59': 0, '08:00-08:14': 0, '08:15-08:30': 0, '08:30-09:00': 0, '> 09:00': 0 };
+  data.filter(r => r.masuk).forEach(r => {
+    const parts = r.masuk.split(':');
+    const h = parseInt(parts[0]), m = parseInt(parts[1]);
+    const total = h * 60 + m;
+    if (total < 7 * 60) arrivalBuckets['< 07:00']++;
+    else if (total < 8 * 60) arrivalBuckets['07:00-07:59']++;
+    else if (total < 8 * 60 + 14) arrivalBuckets['08:00-08:14']++;
+    else if (total < 8 * 60 + 30) arrivalBuckets['08:15-08:30']++;
+    else if (total < 9 * 60) arrivalBuckets['08:30-09:00']++;
+    else arrivalBuckets['> 09:00']++;
+  });
+  initChart('chartArrival', {
+    type: 'bar',
+    data: {
+      labels: Object.keys(arrivalBuckets),
+      datasets: [{ label: 'Jumlah', data: Object.values(arrivalBuckets),
+        backgroundColor: [green, green, green, yellow, yellow, red], borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      ...chartDefaults(),
+      scales: { ...chartDefaults().scales,
+        x: { ...chartDefaults().scales.x, title: { display: true, text: 'Rentang Jam', color: getThemeColor('--text3'), font:{size:10} } },
+        y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jumlah', color: getThemeColor('--text3'), font:{size:10} } } } }
+  });
+
+  // ── Histogram Keterlambatan ──
+  // Jika "Semua": sumbu X = bulan, Y = jumlah kejadian terlambat (per orang per hari)
+  // Jika bulan tertentu: sumbu X = rentang menit, Y = jumlah hari kerja
+  //   → setiap hari kerja dihitung 1x: pakai rata-rata menit terlambat hari itu
+  //   → "Tepat Waktu" = hari kerja di mana 0 orang terlambat
+  document.getElementById('chartLateBarWrap').style.height = '200px';
+  if (isAllMonths) {
+    // Per bulan: hitung total kejadian terlambat (per orang per hari)
+    const monthLateMap = {};
+    data.forEach(r => {
+      const m = r.date.substring(0, 7);
+      if (!monthLateMap[m]) monthLateMap[m] = 0;
+      if (r.isHadir && r.terlambat_min > LATE_TOL) monthLateMap[m]++;
+    });
+    const sortedMonths = Object.keys(monthLateMap).sort();
+    initChart('chartLateBar', {
+      type: 'bar',
+      data: {
+        labels: sortedMonths.map(monthLabel),
+        datasets: [{ label: 'Jumlah Terlambat', data: sortedMonths.map(m => monthLateMap[m]),
+          backgroundColor: yellow + 'bb', borderColor: yellow, borderWidth: 1, borderRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} kejadian` } } },
+        scales: { ...chartDefaults().scales,
+          x: { ...chartDefaults().scales.x, title: { display: true, text: 'Bulan', color: getThemeColor('--text3'), font:{size:10} } },
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jumlah', color: getThemeColor('--text3'), font:{size:10} }, ticks: { ...chartDefaults().scales.y.ticks, stepSize: 1 } } }
+      }
+    });
+  } else {
+    // Per bulan tertentu: hitung per HARI KERJA
+    // Untuk setiap hari kerja, cari rata-rata menit terlambat dari semua karyawan hadir
+    // Tujuan: 1 hari = 1 titik di histogram → tidak bergantung jumlah karyawan
+    const dayLateMap = {}; // date → { totalLateMin, countHadir, anyLate }
+    data.filter(r => r.isHadir && r.masuk).forEach(r => {
+      if (!dayLateMap[r.date]) dayLateMap[r.date] = { avgLate: 0, count: 0, totalLate: 0 };
+      dayLateMap[r.date].count++;
+      dayLateMap[r.date].totalLate += (r.terlambat_min || 0);
+    });
+
+    // Untuk setiap hari kerja, ambil rata-rata menit terlambat seluruh karyawan
+    const lateBuckets = {
+      'Tepat Waktu': 0,
+      '1–5 menit': 0,
+      '6–15 menit': 0,
+      '16–30 menit': 0,
+      '31–60 menit': 0,
+      '> 60 menit': 0,
+    };
+    Object.values(dayLateMap).forEach(d => {
+      const avg = d.count > 0 ? d.totalLate / d.count : 0;
+      if (avg <= 0) lateBuckets['Tepat Waktu']++;
+      else if (avg <= 5) lateBuckets['1–5 menit']++;
+      else if (avg <= 15) lateBuckets['6–15 menit']++;
+      else if (avg <= 30) lateBuckets['16–30 menit']++;
+      else if (avg <= 60) lateBuckets['31–60 menit']++;
+      else lateBuckets['> 60 menit']++;
+    });
+    initChart('chartLateBar', {
+      type: 'bar',
+      data: {
+        labels: Object.keys(lateBuckets),
+        datasets: [{ label: 'Jumlah Hari Kerja', data: Object.values(lateBuckets),
+          backgroundColor: [green, green+'99', yellow, yellow+'cc', red+'99', red],
+          borderRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} hari kerja` } } },
+        scales: { ...chartDefaults().scales,
+          x: { ...chartDefaults().scales.x, title: { display: true, text: 'Rata-rata Menit Terlambat per Hari', color: getThemeColor('--text3'), font:{size:10} } },
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jumlah Hari Kerja', color: getThemeColor('--text3'), font:{size:10} }, ticks: { ...chartDefaults().scales.y.ticks, stepSize: 1 } } }
+      }
+    });
+  }
+
+  // ── Tren Lembur ──
+  // Jika "Semua": sumbu X = bulan, Y = total jam lembur
+  // Jika bulan tertentu: sumbu X = hari, Y = total menit
+  document.getElementById('chartOTBarWrap').style.height = '200px';
+  if (isAllMonths) {
+    const monthOTMap = {};
+    data.forEach(r => {
+      const m = r.date.substring(0, 7);
+      if (!monthOTMap[m]) monthOTMap[m] = 0;
+      monthOTMap[m] += (r.ot_min || 0);
+    });
+    const sortedMonths = Object.keys(monthOTMap).sort();
+    initChart('chartOTBar', {
+      type: 'bar',
+      data: {
+        labels: sortedMonths.map(monthLabel),
+        datasets: [{ label: 'Total Lembur (jam)', data: sortedMonths.map(m => Math.round(monthOTMap[m] / 60 * 10) / 10),
+          backgroundColor: purple + '99', borderColor: purple, borderWidth: 1, borderRadius: 3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} jam` } } },
+        scales: { ...chartDefaults().scales,
+          x: { ...chartDefaults().scales.x, title: { display: true, text: 'Bulan', color: getThemeColor('--text3'), font:{size:10} } },
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Jam', color: getThemeColor('--text3'), font:{size:10} } } }
+      }
+    });
+  } else {
+    // Per hari kerja dalam bulan
+    const dayMap = {};
+    data.forEach(r => {
+      if (!dayMap[r.date]) dayMap[r.date] = 0;
+      dayMap[r.date] += (r.ot_min || 0);
+    });
+    const sortedDates = Object.keys(dayMap).sort();
+    initChart('chartOTBar', {
+      type: 'bar',
+      data: {
+        labels: sortedDates.map(d => d.substring(5)),
+        datasets: [{ label: 'Total Lembur (menit)', data: sortedDates.map(d => dayMap[d]),
+          backgroundColor: purple + '99', borderColor: purple, borderWidth: 1, borderRadius: 3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}m (${Math.floor(ctx.parsed.y/60)}j ${ctx.parsed.y%60}m)` } } },
+        scales: { ...chartDefaults().scales,
+          x: { ...chartDefaults().scales.x, title: { display: true, text: 'Hari', color: getThemeColor('--text3'), font:{size:10} } },
+          y: { ...chartDefaults().scales.y, title: { display: true, text: 'Menit', color: getThemeColor('--text3'), font:{size:10} } } }
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════════
+/**
+ * Precise score (float) for ranking.
+ * A – Punctuality (max 50): -0.5pt per late-minute, finer than count-based
+ * B – Attendance  (max 30): hadir/workdays × 30
+ * C – Overtime    (max 20): capped at 300 min (5h) → ot_min/300 × 20
+ */
+function calcScore(s, totalDays) {
+  const workdays = totalDays || 1;
+  const pA = Math.max(0, 50 - Math.min(50, (s.terlambat_min || 0) * 0.5));
+  const pB = ((s.hari_hadir || 0) / workdays) * 30;
+  const pC = Math.min(20, ((s.ot_min || 0) / 300) * 20);
+  return pA + pB + pC; // float – round only at display
+}
+/** Tiebreaker: score DESC → lateMin ASC → OT DESC → absent ASC → name ASC */
+function lbCompare(a, b) {
+  if (Math.abs(b.score - a.score) > 0.001) return b.score - a.score;
+  if ((a.terlambat_min||0) !== (b.terlambat_min||0)) return (a.terlambat_min||0) - (b.terlambat_min||0);
+  if ((b.ot_min||0) !== (a.ot_min||0)) return (b.ot_min||0) - (a.ot_min||0);
+  if ((a.absen_hari||0) !== (b.absen_hari||0)) return (a.absen_hari||0) - (b.absen_hari||0);
+  return a.nama.localeCompare(b.nama);
+}
+function renderLeaderboard() {
+  // Exclude resigned + nama yang dikecualikan dari leaderboard
+  const EXCLUDE_LB = ['AYU', 'KRISMAWATI', 'RIRIS'];
+  const stats = getFilteredStats().filter(s =>
+    !state.resignedIds.includes(s.id) && !EXCLUDE_LB.includes(s.nama)
+  );
+  if (!stats.length) return;
+  const totalDays = new Set(state.filtered.map(r => r.date)).size;
+  const scored = stats.map(s => ({ ...s, score: calcScore(s, totalDays) })).sort(lbCompare);
+  const maxScore = scored[0]?.score || 100;
+
+  const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+  const lbHtml = scored.map((emp, i) => {
+    const rank = i + 1;
+    const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : 'rn';
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+    const barW = Math.round(emp.score / maxScore * 100);
+    const color = colors[i % colors.length];
+    const pA = Math.max(0, 50 - Math.min(50, (emp.terlambat_min||0) * 0.5));
+    const pB = totalDays > 0 ? (emp.hari_hadir||0) / totalDays * 30 : 0;
+    const pC = Math.min(20, ((emp.ot_min||0) / 300) * 20);
+    const scoreDisplay = Math.round(emp.score);
+    const scoreDetail = `Ketepatan: ${pA.toFixed(1)}/50  ·  Kehadiran: ${pB.toFixed(1)}/30  ·  Lembur: ${pC.toFixed(1)}/20`;
+    const adminBtn = state.isAdmin ? `<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px;margin-left:8px" onclick="toggleResign('${emp.id}')">✕ Resign</button>` : '';
+    return `<div class="lb-item ${rank<=3?'rank'+rank:''}">
+      <div class="lb-rank ${rankClass}">${medal}</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,${color}99,${color})">${state.avatars[emp.id] ? `<img src="${state.avatars[emp.id]}" style="width:36px;height:36px;border-radius:50%;object-fit:cover"/>` : emp.nama.charAt(0)}</div>
+      <div class="lb-info">
+        <div class="lb-name"><span style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--border2)" onclick="goToProfile('${emp.id}')" title="Lihat profil ${emp.nama}">${emp.nama}</span>${adminBtn}</div>
+        <div class="lb-dept">${emp.dept} · Hadir ${emp.hari_hadir}d · Telat ${emp.terlambat_kali}x (${fmtMin(emp.terlambat_min||0)}) · Lembur ${fmtMin(emp.ot_min||0)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace">${scoreDetail}</div>
+        <div class="lb-bar-wrap" style="margin-top:6px"><div class="lb-bar" style="width:${barW}%;background:linear-gradient(90deg,${color}88,${color})"></div></div>
+      </div>
+      <div class="lb-score">
+        <div class="lb-score-val" style="color:${color}">${scoreDisplay}</div>
+        <div class="lb-score-lbl">/ 100</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('lbList').innerHTML = lbHtml;
+
+  // Radar for top 5 — axes aligned with scoring formula
+  const top5 = scored.slice(0, 5);
+  const totalDaysForPct = totalDays || 1;
+  const blue = getThemeColor('--blue');
+  initChart('chartLbRadar', {
+    type: 'radar',
+    data: {
+      labels: ['Kehadiran','Ketepatan Waktu','Lembur','Konsistensi Hadir','Skor Akhir'],
+      datasets: top5.map((e, i) => ({
+        label: e.nama,
+        data: [
+          Math.round(e.hari_hadir / totalDaysForPct * 100),
+          Math.round(Math.max(0, 50 - Math.min(50, (e.terlambat_min||0) * 0.5)) / 50 * 100),
+          Math.min(100, Math.round((e.ot_min || 0) / 300 * 100)),
+          Math.round(Math.max(0, 100 - (e.absen_hari || 0) / totalDaysForPct * 100)),
+          Math.round(e.score),
+        ],
+        borderColor: colors[i], backgroundColor: colors[i] + '20', pointBackgroundColor: colors[i], borderWidth: 2,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { grid: { color: getThemeColor('--border') }, angleLines: { color: getThemeColor('--border') }, ticks: { backdropColor: 'transparent', color: getThemeColor('--text3'), font: { size: 9 } }, pointLabels: { color: getThemeColor('--text2'), font: { size: 10 } } } },
+      plugins: { legend: { labels: { color: getThemeColor('--text3'), font: { size: 10 }, boxWidth: 10 } } }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// FULL CALENDAR BUILDER FOR PERSONAL DETAIL
+// ══════════════════════════════════════════════
+function buildFullCalendarRows(empId, selectedMonth) {
+  // Build map of date -> row from raw data for this employee
+  const rawMap = {};
+  state.raw.filter(r => r.id === empId).forEach(r => { rawMap[r.date] = r; });
+
+  // Determine which months to show
+  let months = [];
+  if (selectedMonth) {
+    months = [selectedMonth];
+  } else {
+    const ms = new Set(Object.keys(rawMap).map(d => d.substring(0,7)));
+    months = [...ms].sort();
+    if (!months.length) return '<tr><td colspan="7" style="text-align:center;color:var(--text3)">Tidak ada data.</td></tr>';
+  }
+
+  // Tanggal merah: gunakan data dari state (terdeteksi saat parsing)
+  const allDatesWithData = new Set(state.raw.map(r => r.date));
+
+  let rows = '';
+  months.forEach(ym => {
+    const [y, m] = ym.split('-').map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    let prevMonth = '';
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dow = getDow(dateStr); // 0=Sun, 6=Sat
+      const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+      const dayName = dayNames[dow];
+      const isWeekend = dow === 0 || dow === 6;
+
+      // Month header row
+      const curMonth = dateStr.substring(0,7);
+      if (curMonth !== prevMonth) {
+        prevMonth = curMonth;
+        const mLabel = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][m];
+        rows += `<tr><td colspan="7" style="background:var(--panel2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:8px 14px">${mLabel} ${y}</td></tr>`;
+      }
+
+      if (isWeekend) {
+        rows += `<tr style="opacity:.35"><td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${dateStr}</td><td style="color:var(--text3)">${dayName}</td><td>—</td><td>—</td><td><span class="badge libur">Libur</span></td><td>—</td><td>—</td></tr>`;
+        continue;
+      }
+
+      // Tanggal merah: weekday yang tidak ada di state.raw (libur nasional)
+      const isPH = state.tanggalMerahDates.has(dateStr) || (!allDatesWithData.has(dateStr));
+      if (isPH) {
+        rows += `<tr style="opacity:.45"><td style="font-family:'JetBrains Mono',monospace;color:var(--red)">${dateStr}</td><td style="color:var(--red);font-weight:600">${dayName}</td><td>—</td><td>—</td><td><span class="badge" style="background:var(--red-bg);color:var(--red)">Tanggal Merah</span></td><td>—</td><td>—</td></tr>`;
+        continue;
+      }
+
+      const r = rawMap[dateStr];
+      if (!r) {
+        // Weekday with company data but employee absent
+        rows += `<tr><td style="font-family:'JetBrains Mono',monospace">${dateStr}</td><td style="color:var(--text3)">${dayName}</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td><span class="badge absen">Absen</span></td><td>—</td><td>—</td></tr>`;
+        continue;
+      }
+
+      let status;
+      if (!r.isHadir && r.statusNote === 'S') status = '<span class="badge cuti">Sakit</span>';
+      else if (!r.isHadir && r.statusNote === 'CUTI') status = '<span class="badge cuti">Cuti/Izin</span>';
+      else if (!r.isHadir) status = '<span class="badge absen">Absen</span>';
+      else if (r.terlambat_min > LATE_TOL) status = '<span class="badge terlambat">Terlambat</span>';
+      else status = '<span class="badge hadir">Hadir</span>';
+      const late = r.terlambat_min > LATE_TOL ? `<span style="color:var(--orange)">${r.terlambat_min}m</span>` : '—';
+      const ot = r.ot_min > 0 ? `<span style="color:var(--purple)">${fmtMin(r.ot_min)}</span>` : '—';
+      rows += `<tr><td style="font-family:'JetBrains Mono',monospace">${dateStr}</td><td style="color:var(--text3)">${dayName}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--green)">${r.masuk || '—'}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--blue)">${r.keluar || '—'}</td><td>${status}</td><td>${late}</td><td>${ot}</td></tr>`;
+    }
+  });
+  return rows;
+}
+
+// ══════════════════════════════════════════════
+// PERSONAL PROFILE
+// ══════════════════════════════════════════════
+function populateEmpSelectors() {
+  // Show all employees in personal profile (including resigned, for HR review)
+  const opts = state.employees.map(e => {
+    const r = state.resignedIds.includes(e.id) ? ' [Resign]' : '';
+    return `<option value="${e.id}">${e.nama}${r}</option>`;
+  }).join('');
+  document.getElementById('empSelector').innerHTML = opts;
+  if (state.employees.length > 0) renderPersonal();
+}
+function renderPersonalSection() {
+  if (!state.employees.length) return;
+  renderPersonal();
+}
+function renderPersonal() {
+  const empId = document.getElementById('empSelector').value;
+  const month = document.getElementById('personalMonth').value;
+  if (!empId) return;
+  let empRows = state.raw.filter(r => r.id === empId && !r.isWeekend);
+  if (month) empRows = empRows.filter(r => r.date.startsWith(month));
+  if (!empRows.length && !state.raw.filter(r => r.id === empId).length) { document.getElementById('personalContent').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">Tidak ada data untuk periode ini.</div>'; return; }
+
+  const emp = state.employees.find(e => e.id === empId);
+  const empStat = state.stats.find(s => s.id === empId) || {};
+  const totalDays = new Set(empRows.map(r => r.date)).size;
+  const hadirRows = empRows.filter(r => r.isHadir);
+  const absenRows = empRows.filter(r => !r.isHadir);
+  const lateRows = empRows.filter(r => r.terlambat_min > LATE_TOL);
+  const totalLateMin = lateRows.reduce((s, r) => s + r.terlambat_min, 0);
+  const totalOTMin = empRows.reduce((s, r) => s + (r.ot_min || 0), 0);
+  const avgWorkMin = hadirRows.length ? Math.round(hadirRows.reduce((s, r) => s + (r.total_min || 480), 0) / hadirRows.length) : 0;
+  const attendRate = totalDays > 0 ? Math.round(hadirRows.length / totalDays * 100) : 0;
+  const totalDaysForScore = new Set(state.filtered.map(r => r.date)).size || totalDays;
+  const score = Math.round(calcScore({ hari_hadir: hadirRows.length, absen_hari: absenRows.length, terlambat_kali: lateRows.length, terlambat_min: totalLateMin, ot_min: totalOTMin }, totalDaysForScore));
+
+  // Evaluation notes
+  const evalNotes = [];
+  if (attendRate >= 95) evalNotes.push({ icon: '✅', text: '<strong>Kehadiran Excellent:</strong> Tingkat kehadiran ' + attendRate + '% sangat baik.' });
+  else if (attendRate >= 85) evalNotes.push({ icon: '🟡', text: '<strong>Kehadiran Cukup:</strong> Kehadiran ' + attendRate + '%. Perlu ditingkatkan.' });
+  else evalNotes.push({ icon: '🔴', text: '<strong>Kehadiran Rendah:</strong> Hanya ' + attendRate + '%. Perlu perhatian khusus.' });
+  if (lateRows.length === 0) evalNotes.push({ icon: '⭐', text: '<strong>Selalu Tepat Waktu:</strong> Tidak ada keterlambatan di periode ini.' });
+  else if (lateRows.length <= 2) evalNotes.push({ icon: '🟡', text: `<strong>Sedikit Terlambat:</strong> ${lateRows.length}x terlambat (total ${fmtMin(totalLateMin)}). Pertahankan kedisiplinan.` });
+  else evalNotes.push({ icon: '🔴', text: `<strong>Sering Terlambat:</strong> ${lateRows.length}x terlambat (total ${fmtMin(totalLateMin)}). Perlu perbaikan segera.` });
+  if (totalOTMin > 0) evalNotes.push({ icon: '💼', text: `<strong>Kontribusi Lembur:</strong> ${fmtMin(totalOTMin)} total lembur. Dedikasi tinggi.` });
+  if (absenRows.length > 3) evalNotes.push({ icon: '⚠️', text: `<strong>Absensi Tinggi:</strong> ${absenRows.length} hari absen. Diperlukan klarifikasi.` });
+
+  // Monthly breakdown
+  const monthMap = {};
+  empRows.forEach(r => {
+    const m = r.date.substring(0, 7);
+    if (!monthMap[m]) monthMap[m] = { hadir: 0, late: 0, lateMin: 0, ot: 0, absen: 0 };
+    if (r.isHadir) monthMap[m].hadir++; else monthMap[m].absen++;
+    if (r.terlambat_min > LATE_TOL) { monthMap[m].late++; monthMap[m].lateMin += r.terlambat_min; }
+    monthMap[m].ot += r.ot_min || 0;
+  });
+  const monthKeys = Object.keys(monthMap).sort();
+
+  const kpiColor = v => v > 80 ? 'var(--green)' : v > 60 ? 'var(--yellow)' : 'var(--red)';
+
+  document.getElementById('personalContent').innerHTML = `
+    <div class="profile-header">
+      <div class="avatar-wrap" title="${state.isAdmin ? 'Ganti foto via panel Admin' : emp.nama}">
+        ${state.avatars[emp.id]
+          ? `<img class="avatar-img" src="${state.avatars[emp.id]}" alt="${emp.nama}"/>`
+          : `<div class="profile-avatar">${emp.nama.charAt(0)}</div>`}
+        ${state.isAdmin ? '<div class="avatar-edit-overlay" onclick="openAdminModal()">📷</div>' : ''}
+      </div>
+      <div class="profile-identity">
+        <h2>${emp.nama} ${state.resignedIds.includes(emp.id) ? '<span class="badge resign" style="font-size:11px;vertical-align:middle">Resign</span>' : ''}</h2>
+        <p>ID: ${emp.id} · ${emp.dept}</p>
+        <p style="margin-top:6px;font-size:13px">Skor Performa: <strong style="color:${kpiColor(score)};font-family:'JetBrains Mono',monospace;font-size:18px">${score}</strong><span style="color:var(--text3)">/100</span></p>
+      </div>
+      <div class="profile-kpis">
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--green)">${hadirRows.length}</div><div class="profile-kpi-lbl">Hari Hadir</div></div>
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--blue)">${attendRate}%</div><div class="profile-kpi-lbl">Kehadiran</div></div>
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--yellow)">${lateRows.length}x</div><div class="profile-kpi-lbl">Terlambat</div></div>
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--orange)">${fmtMin(totalLateMin)}</div><div class="profile-kpi-lbl">Total Keterlambatan</div></div>
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--purple)">${fmtMin(totalOTMin)}</div><div class="profile-kpi-lbl">Total Lembur</div></div>
+        <div class="profile-kpi"><div class="profile-kpi-val" style="color:var(--red)">${absenRows.length}</div><div class="profile-kpi-lbl">Hari Absen</div></div>
+      </div>
+    </div>
+    <div class="charts-grid three">
+      <div class="chart-card">
+        <div class="chart-title">📅 Kehadiran per Bulan</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="chartEmpAttend"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">⏰ Keterlambatan per Bulan</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="chartEmpLate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🌙 Lembur per Bulan</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="chartEmpOT"></canvas></div>
+      </div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-title">📋 Catatan Evaluasi</div>
+      ${evalNotes.map(n => `<div class="eval-item"><div class="eval-icon">${n.icon}</div><div class="eval-text">${n.text}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:16px">
+      <div class="chart-title" style="margin-bottom:10px">🗓 Riwayat Absensi Detail</div>
+      ${month
+        ? `<div class="table-wrap">
+            <table>
+              <thead><tr><th>Tanggal</th><th>Hari</th><th>Jam Masuk</th><th>Jam Keluar</th><th>Status</th><th>Terlambat</th><th>Lembur</th></tr></thead>
+              <tbody>${buildFullCalendarRows(empId, month)}</tbody>
+            </table>
+          </div>`
+        : `<div class="table-wrap">
+            <table>
+              <thead><tr><th>Bulan</th><th>Hadir</th><th>Absen</th><th>Terlambat</th><th>Total Keterlambatan</th><th>Lembur</th></tr></thead>
+              <tbody>${monthKeys.map(m => {
+                  const mm = monthMap[m];
+                  return `<tr>
+                    <td style="font-weight:600">${monthLabel(m)}</td>
+                    <td style="color:var(--green);font-family:'JetBrains Mono',monospace">${mm.hadir}</td>
+                    <td style="color:var(--red);font-family:'JetBrains Mono',monospace">${mm.absen}</td>
+                    <td style="color:var(--yellow);font-family:'JetBrains Mono',monospace">${mm.late}x</td>
+                    <td style="color:var(--orange);font-family:'JetBrains Mono',monospace">${fmtMin(mm.lateMin || 0)}</td>
+                    <td style="color:var(--purple);font-family:'JetBrains Mono',monospace">${fmtMin(mm.ot)}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text3)">💡 Pilih bulan tertentu untuk melihat detail harian lengkap</div>`
+      }
+    </div>
+  `;
+
+  // Charts — 3 separate line charts with months on X axis
+  const blue = getThemeColor('--blue');
+  const green = getThemeColor('--green');
+  const red2 = getThemeColor('--red');
+  const yellow = getThemeColor('--yellow');
+  const purple = getThemeColor('--purple');
+
+  // Chart 1: Attendance — Hadir (green) vs Absen (red), line chart
+  initChart('chartEmpAttend', {
+    type: 'line',
+    data: {
+      labels: monthKeys.map(monthLabel),
+      datasets: [
+        { label: 'Hadir', data: monthKeys.map(m => monthMap[m].hadir), borderColor: green, backgroundColor: green + '20', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: green },
+        { label: 'Absen', data: monthKeys.map(m => monthMap[m].absen), borderColor: red2, backgroundColor: red2 + '20', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: red2 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, ...chartDefaults(), interaction: { mode: 'index' } }
+  });
+
+  // Chart 2: Keterlambatan per bulan — line
+  initChart('chartEmpLate', {
+    type: 'line',
+    data: {
+      labels: monthKeys.map(monthLabel),
+      datasets: [
+        { label: 'Keterlambatan (kali)', data: monthKeys.map(m => monthMap[m].late), borderColor: yellow, backgroundColor: yellow + '25', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: yellow }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, ...chartDefaults(),
+      scales: { ...chartDefaults().scales, y: { ...chartDefaults().scales.y, ticks: { ...chartDefaults().scales.y.ticks, stepSize: 1 } } }
+    }
+  });
+
+  // Chart 3: Lembur per bulan — line
+  initChart('chartEmpOT', {
+    type: 'line',
+    data: {
+      labels: monthKeys.map(monthLabel),
+      datasets: [
+        { label: 'Lembur (menit)', data: monthKeys.map(m => monthMap[m].ot), borderColor: purple, backgroundColor: purple + '25', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: purple }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, ...chartDefaults(),
+      plugins: { ...chartDefaults().plugins, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} menit (${Math.floor(ctx.parsed.y/60)}j ${ctx.parsed.y%60}m)` } } }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// TABLE
+// ══════════════════════════════════════════════
+function renderTable() {
+  const search = document.getElementById('tableSearch').value.toLowerCase();
+  let rows = state.filtered;
+  if (search) rows = rows.filter(r => r.nama.toLowerCase().includes(search) || r.id.includes(search));
+  rows = rows.sort((a, b) => a.date.localeCompare(b.date) || a.nama.localeCompare(b.nama));
+  document.getElementById('tableInfo').textContent = `${rows.length} baris`;
+  const html = `<table>
+    <thead><tr><th>ID</th><th>Nama</th><th>Departemen</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Terlambat</th><th>Lembur</th></tr></thead>
+    <tbody>${rows.map(r => {
+      const status = !r.isHadir && r.statusNote === 'S' ? '<span class="badge cuti">Sakit</span>' : !r.isHadir && r.statusNote === 'CUTI' ? '<span class="badge cuti">Cuti/Izin</span>' : !r.isHadir ? '<span class="badge absen">Absen</span>' : r.terlambat_min > LATE_TOL ? '<span class="badge terlambat">Terlambat</span>' : '<span class="badge hadir">Hadir</span>';
+      const late = r.terlambat_min > LATE_TOL ? `<span style="color:var(--orange)">${r.terlambat_min}m</span>` : '—';
+      const ot = r.ot_min > 0 ? `<span style="color:var(--purple)">${fmtMin(r.ot_min)}</span>` : '—';
+      return `<tr><td style="color:var(--text3);font-family:'JetBrains Mono',monospace">${r.id}</td><td style="font-weight:500">${r.nama}</td><td style="color:var(--text3)">${r.dept}</td><td style="font-family:'JetBrains Mono',monospace">${r.date}</td><td style="font-family:'JetBrains Mono',monospace">${r.masuk || '—'}</td><td style="font-family:'JetBrains Mono',monospace">${r.keluar || '—'}</td><td>${status}</td><td>${late}</td><td>${ot}</td></tr>`;
+    }).join('')}</tbody>
+  </table>`;
+  document.getElementById('mainTable').innerHTML = html;
+}
+function filterTable() { renderTable(); }
+
+// ══════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════
+function addHistory(name, size, rows) {
+  state.history.unshift({ name, size, rows, ts: Date.now() });
+  if (state.history.length > 20) state.history = state.history.slice(0, 20);
+  localStorage.setItem('pres_history', JSON.stringify(state.history));
+  document.getElementById('nbHistory').textContent = state.history.length;
+  if (currentSection === 'history') renderHistory();
+}
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!state.history.length) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">Belum ada file yang diupload.</div>';
+    return;
+  }
+  list.innerHTML = state.history.map((h, i) => `
+    <div class="history-item">
+      <div class="history-icon">📊</div>
+      <div class="history-info">
+        <div class="history-name">${h.name}</div>
+        <div class="history-meta">${h.rows} baris · ${(h.size / 1024).toFixed(1)} KB · ${new Date(h.ts).toLocaleString('id-ID')}</div>
+      </div>
+      <button class="history-del" onclick="deleteHistory(${i})" title="Hapus">✕</button>
+    </div>
+  `).join('');
+  document.getElementById('nbHistory').textContent = state.history.length;
+}
+function deleteHistory(i) {
+  state.history.splice(i, 1);
+  localStorage.setItem('pres_history', JSON.stringify(state.history));
+  renderHistory();
+}
+function clearHistory() {
+  state.history = [];
+  localStorage.removeItem('pres_history');
+  renderHistory();
+}
+
+// ══════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════
+function exportData() {
+  const rows = state.filtered.sort((a, b) => a.date.localeCompare(b.date));
+  const wsData = [['ID','Nama','Departemen','Tanggal','Masuk','Keluar','Hadir','Terlambat (min)','Lembur (min)']];
+  rows.forEach(r => wsData.push([r.id, r.nama, r.dept, r.date, r.masuk || '', r.keluar || '', r.isHadir ? 'Ya' : 'Tidak', r.terlambat_min, r.ot_min]));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Presensi');
+  XLSX.writeFile(wb, 'presensi_export.xlsx');
+}
+
+// ══════════════════════════════════════════════
+// ADMIN SYSTEM
+// ══════════════════════════════════════════════
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+}
+function submitPin() {
+  const pin = document.getElementById('adminPinInput').value;
+  if (pin === state.adminPin) {
+    state.isAdmin = true;
+    document.getElementById('btnAdmin').innerHTML = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px"><path d="M10 2L4 5v5c0 4.4 2.6 8.5 6 10 3.4-1.5 6-5.6 6-10V5l-6-3z"/></svg> Admin ✓`;
+    document.getElementById('btnAdmin').style.color = 'var(--green)';
+    // Show panel
+    document.getElementById('adminPanelLogin').style.display = 'none';
+    document.getElementById('adminPanelDash').style.display = '';
+    populateAdminPhotoSelect();
+    switchAdminTab('pin');
+    renderCurrentSection();
+  } else {
+    document.getElementById('adminModalErr').style.display = 'block';
+    document.getElementById('adminPinInput').value = '';
+    document.getElementById('adminPinInput').focus();
+  }
+}
+function switchAdminTab(tab) {
+  ['pin','photo','resign','undo'].forEach(t => {
+    const el = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.style.display = t === tab ? '' : 'none';
+    if (btn) { btn.style.borderColor = t === tab ? 'var(--blue)' : ''; btn.style.color = t === tab ? 'var(--blue)' : ''; }
+  });
+  if (tab === 'photo') updateAdminPhotoPreview();
+  if (tab === 'resign') renderAdminResignList();
+  if (tab === 'undo') renderUndoList();
+}
+function changePin() {
+  const old = document.getElementById('pinOld').value;
+  const n1 = document.getElementById('pinNew').value;
+  const n2 = document.getElementById('pinNew2').value;
+  const errEl = document.getElementById('pinChangeErr');
+  errEl.style.display = 'none';
+  if (old !== state.adminPin) { errEl.textContent = 'PIN lama salah.'; errEl.style.display = 'block'; return; }
+  if (n1.length < 4) { errEl.textContent = 'PIN baru minimal 4 karakter.'; errEl.style.display = 'block'; return; }
+  if (n1 !== n2) { errEl.textContent = 'Konfirmasi PIN tidak cocok.'; errEl.style.display = 'block'; return; }
+  state.adminPin = n1;
+  localStorage.setItem('pres_admin_pin', n1);
+  document.getElementById('pinOld').value = '';
+  document.getElementById('pinNew').value = '';
+  document.getElementById('pinNew2').value = '';
+  errEl.textContent = '✅ PIN berhasil diubah!';
+  errEl.style.color = 'var(--green)';
+  errEl.style.display = 'block';
+  setTimeout(() => { errEl.style.display = 'none'; errEl.style.color = ''; }, 2500);
+}
+function populateAdminPhotoSelect() {
+  const sel = document.getElementById('adminEmpPhotoSelect');
+  sel.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.nama}</option>`).join('');
+  updateAdminPhotoPreview();
+  sel.onchange = updateAdminPhotoPreview;
+}
+function openAdminModal(tab) {
+  if (state.isAdmin) {
+    document.getElementById('adminPanelLogin').style.display = 'none';
+    document.getElementById('adminPanelDash').style.display = '';
+    populateAdminPhotoSelect();
+    switchAdminTab(tab || 'pin');
+    document.getElementById('adminModal').style.display = 'flex';
+    return;
+  }
+  document.getElementById('adminPanelLogin').style.display = '';
+  document.getElementById('adminPanelDash').style.display = 'none';
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('adminModalErr').style.display = 'none';
+  document.getElementById('adminModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+}
+function updateAdminPhotoPreview() {
+  const empId = document.getElementById('adminEmpPhotoSelect').value;
+  const prev = document.getElementById('adminPhotoPreview');
+  if (state.avatars[empId]) {
+    prev.innerHTML = `<img src="${state.avatars[empId]}" style="width:56px;height:56px;object-fit:cover"/>`;
+  } else {
+    const emp = state.employees.find(e => e.id === empId);
+    prev.innerHTML = `<span style="font-size:22px;font-weight:700;color:var(--text2)">${emp ? emp.nama.charAt(0) : '?'}</span>`;
+  }
+}
+function adminHandlePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const empId = document.getElementById('adminEmpPhotoSelect').value;
+  const emp = state.employees.find(e => e.id === empId);
+  const reader = new FileReader();
+  reader.onload = e => {
+    const oldPhoto = state.avatars[empId] || null;
+    pushUndo('set_photo', { id: empId, nama: emp?.nama || empId, oldPhoto });
+    state.avatars[empId] = e.target.result;
+    localStorage.setItem('pres_avatars', JSON.stringify(state.avatars));
+    updateAdminPhotoPreview();
+    renderCurrentSection();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+function removeEmpPhoto() {
+  const empId = document.getElementById('adminEmpPhotoSelect').value;
+  const emp = state.employees.find(e => e.id === empId);
+  pushUndo('remove_photo', { id: empId, nama: emp?.nama || empId, oldPhoto: state.avatars[empId] || null });
+  delete state.avatars[empId];
+  localStorage.setItem('pres_avatars', JSON.stringify(state.avatars));
+  updateAdminPhotoPreview();
+  renderCurrentSection();
+}
+// ══════════════════════════════════════════════
+// UNDO SYSTEM
+// ══════════════════════════════════════════════
+const MAX_UNDO = 20;
+function pushUndo(action, data) {
+  const history = JSON.parse(localStorage.getItem('pres_undo') || '[]');
+  history.unshift({ action, data, ts: Date.now() });
+  if (history.length > MAX_UNDO) history.length = MAX_UNDO;
+  localStorage.setItem('pres_undo', JSON.stringify(history));
+}
+function renderUndoList() {
+  const history = JSON.parse(localStorage.getItem('pres_undo') || '[]');
+  const el = document.getElementById('adminUndoList');
+  if (!history.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">Belum ada perubahan.</div>'; return; }
+  el.innerHTML = history.map((h, i) => {
+    const dt = new Date(h.ts).toLocaleString('id-ID');
+    let label = '';
+    if (h.action === 'resign') label = `Tandai Resign: ${h.data.nama}`;
+    else if (h.action === 'restore') label = `Restore Aktif: ${h.data.nama}`;
+    else if (h.action === 'remove_photo') label = `Hapus Foto: ${h.data.nama}`;
+    else if (h.action === 'set_photo') label = `Set Foto: ${h.data.nama}`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${label}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${dt}</div>
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--yellow)" onclick="doUndo(${i})">↩ Undo</button>
+    </div>`;
+  }).join('');
+}
+function doUndo(i) {
+  const history = JSON.parse(localStorage.getItem('pres_undo') || '[]');
+  const entry = history[i];
+  if (!entry) return;
+  if (entry.action === 'resign') {
+    // Undo resign → restore
+    const idx = state.resignedIds.indexOf(entry.data.id);
+    if (idx >= 0) state.resignedIds.splice(idx, 1);
+    localStorage.setItem('pres_resigned', JSON.stringify(state.resignedIds));
+  } else if (entry.action === 'restore') {
+    // Undo restore → re-resign
+    if (!state.resignedIds.includes(entry.data.id)) state.resignedIds.push(entry.data.id);
+    localStorage.setItem('pres_resigned', JSON.stringify(state.resignedIds));
+  } else if (entry.action === 'set_photo') {
+    // Undo set_photo → restore old photo
+    if (entry.data.oldPhoto) state.avatars[entry.data.id] = entry.data.oldPhoto;
+    else delete state.avatars[entry.data.id];
+    localStorage.setItem('pres_avatars', JSON.stringify(state.avatars));
+  } else if (entry.action === 'remove_photo') {
+    // Undo remove_photo → restore photo
+    if (entry.data.oldPhoto) { state.avatars[entry.data.id] = entry.data.oldPhoto; localStorage.setItem('pres_avatars', JSON.stringify(state.avatars)); }
+  }
+  history.splice(i, 1);
+  localStorage.setItem('pres_undo', JSON.stringify(history));
+  renderUndoList();
+  renderAdminResignList();
+  renderCurrentSection();
+}
+function clearUndoHistory() {
+  localStorage.removeItem('pres_undo');
+  renderUndoList();
+}
+function renderAdminResignList() {
+  const el = document.getElementById('adminResignList');
+  if (!el) return;
+  el.innerHTML = state.employees.map(e => {
+    const isResigned = state.resignedIds.includes(e.id);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1f6feb,#8250df);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${e.nama.charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--text)">${e.nama}</div>
+        <div style="font-size:11px;color:var(--text3)">ID: ${e.id} · ${e.dept}</div>
+      </div>
+      <span class="badge ${isResigned ? 'resign' : 'hadir'}" style="margin-right:4px">${isResigned ? 'Resign' : 'Aktif'}</span>
+      ${isResigned
+        ? `<button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--green)" onclick="toggleResign('${e.id}')">↩ Restore</button>`
+        : `<button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--red)" onclick="toggleResign('${e.id}')">✕ Resign</button>`}
+    </div>`;
+  }).join('');
+}
+function toggleResign(empId) {
+  if (!state.isAdmin) return;
+  const emp = state.employees.find(e => e.id === empId);
+  const idx = state.resignedIds.indexOf(empId);
+  if (idx >= 0) {
+    pushUndo('restore', { id: empId, nama: emp?.nama || empId });
+    state.resignedIds.splice(idx, 1);
+  } else {
+    pushUndo('resign', { id: empId, nama: emp?.nama || empId });
+    state.resignedIds.push(empId);
+  }
+  localStorage.setItem('pres_resigned', JSON.stringify(state.resignedIds));
+  renderAdminResignList();
+  renderCurrentSection();
+}
+
+// Avatar management is handled by Admin Panel
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.getElementById('nbHistory').textContent = state.history.length;
+renderHistory();
+</script>
+</body>
 </html>
